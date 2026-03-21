@@ -7,7 +7,7 @@ class IELTSCoach {
         this.currentView = 'dashboard';
         this.userSettings = this.loadSettings();
         this.supabase = null;
-        this.availableModels = [];
+        this.availableModels = { text: [], audio: [] };
         this.currentTasks = { writing: null, reading: null, speaking: null };
         
         this.init();
@@ -18,7 +18,7 @@ class IELTSCoach {
         this.initSupabase();
         this.initScoreSelectors();
         this.initAPIFields();
-        this.initAppearance();
+        this.applyFontSize(this.userSettings.FONT_SIZE); // Apply from storage
         this.bindEvents();
         this.applyLanguage();
         this.updateView();
@@ -38,7 +38,7 @@ class IELTSCoach {
         const defaultSettings = {
             ...CONFIG.SYSTEM_TARGET,
             MODEL_GEN: 'gemini-1.5-flash-latest',
-            MODEL_EVAL: 'gemini-1.5-pro-latest',
+            MODEL_AUDIO: 'gemini-2.0-flash-exp',
             FONT_SIZE: 16
         };
         try {
@@ -65,24 +65,6 @@ class IELTSCoach {
     getGeminiKey() { return this.userSettings.GEMINI_KEY || CONFIG.GEMINI_API_KEY; }
     getSupabaseURL() { return this.userSettings.SUPABASE_URL || CONFIG.SUPABASE_URL; }
     getSupabaseKey() { return this.userSettings.SUPABASE_KEY || CONFIG.SUPABASE_ANON_KEY; }
-
-    initAppearance() {
-        const fontSize = this.userSettings.FONT_SIZE || 16;
-        this.applyFontSize(fontSize);
-        const slider = document.getElementById('input-font-size');
-        const valLabel = document.getElementById('font-size-val');
-        if (slider && valLabel) {
-            slider.value = fontSize;
-            valLabel.textContent = fontSize;
-            slider.addEventListener('input', (e) => {
-                const val = e.target.value;
-                valLabel.textContent = val;
-                this.applyFontSize(val);
-                this.userSettings.FONT_SIZE = parseInt(val);
-                this.saveSettings();
-            });
-        }
-    }
 
     applyFontSize(size) {
         document.documentElement.style.setProperty('--base-font-size', `${size}px`);
@@ -118,8 +100,6 @@ class IELTSCoach {
     calculateOverall() {
         const { L, R, W, S } = this.userSettings;
         const avg = (L + R + W + S) / 4;
-        // IELTS Rounding: round to nearest 0.25 up.
-        // 6.25 -> 6.5, 6.75 -> 7.0, 6.125 -> 6.0 (Standard)
         const rounded = Math.round(avg * 4) / 4;
         document.getElementById('target-overall-val').textContent = rounded.toFixed(1);
         const progress = document.getElementById('overall-progress');
@@ -146,6 +126,21 @@ class IELTSCoach {
         });
         document.getElementById('btn-submit-writing')?.addEventListener('click', () => this.handleWritingSubmission());
         document.getElementById('btn-save-keys')?.addEventListener('click', () => this.handleSaveKeys());
+
+        // Zoom Controls
+        document.getElementById('zoom-in')?.addEventListener('click', () => this.changeZoom(1));
+        document.getElementById('zoom-out')?.addEventListener('click', () => this.changeZoom(-1));
+        document.getElementById('zoom-reset')?.addEventListener('click', () => this.changeZoom(0));
+    }
+
+    changeZoom(delta) {
+        let size = this.userSettings.FONT_SIZE || 16;
+        if (delta === 0) size = 16;
+        else size = Math.max(12, Math.min(30, size + delta));
+        
+        this.userSettings.FONT_SIZE = size;
+        this.applyFontSize(size);
+        this.saveSettings();
     }
 
     handleSaveKeys() {
@@ -198,25 +193,44 @@ class IELTSCoach {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
             if (!res.ok) return;
             const data = await res.json();
-            this.availableModels = data.models
-                .filter(m => m.supportedGenerationMethods.includes('generateContent'))
-                .map(m => m.name.replace('models/', ''));
+            
+            this.availableModels = { text: [], audio: [] };
+            
+            data.models.forEach(m => {
+                const name = m.name.replace('models/', '');
+                // Categorize models
+                // 1. Text category (all generateContent models)
+                if (m.supportedGenerationMethods.includes('generateContent')) {
+                    this.availableModels.text.push(name);
+                }
+                // 2. Audio category (Gemini 2.x which has native audio / Multimodal Live)
+                if (name.includes('gemini-2.0') || name.includes('flash') || name.includes('audio')) {
+                    this.availableModels.audio.push(name);
+                }
+            });
+            console.log("Categorized Models:", this.availableModels);
         } catch {
-            this.availableModels = ['gemini-1.5-flash-latest', 'gemini-2.0-flash-exp'];
+            this.availableModels = { text: ['gemini-1.5-flash-latest'], audio: ['gemini-2.0-flash-exp'] };
         }
     }
 
     initModelSelectors() {
         const genSelect = document.getElementById('model-gen');
-        const evalSelect = document.getElementById('model-eval');
-        if (!genSelect || !evalSelect) return;
-        genSelect.innerHTML = ''; evalSelect.innerHTML = '';
-        this.availableModels.forEach(m => {
+        const audioSelect = document.getElementById('model-audio');
+        if (!genSelect || !audioSelect) return;
+        
+        genSelect.innerHTML = ''; 
+        audioSelect.innerHTML = '';
+        
+        this.availableModels.text.forEach(m => {
             genSelect.add(new Option(m, m, m === this.userSettings.MODEL_GEN, m === this.userSettings.MODEL_GEN));
-            evalSelect.add(new Option(m, m, m === this.userSettings.MODEL_EVAL, m === this.userSettings.MODEL_EVAL));
         });
+        this.availableModels.audio.forEach(m => {
+            audioSelect.add(new Option(m, m, m === this.userSettings.MODEL_AUDIO, m === this.userSettings.MODEL_AUDIO));
+        });
+        
         genSelect.addEventListener('change', (e) => { this.userSettings.MODEL_GEN = e.target.value; this.saveSettings(); });
-        evalSelect.addEventListener('change', (e) => { this.userSettings.MODEL_EVAL = e.target.value; this.saveSettings(); });
+        audioSelect.addEventListener('change', (e) => { this.userSettings.MODEL_AUDIO = e.target.value; this.saveSettings(); });
     }
 
     async generateProblem(skill) {
@@ -226,7 +240,10 @@ class IELTSCoach {
             btn.disabled = true; btn.innerHTML = "Generating...";
             const target = this.userSettings[skill === 'writing' ? 'W' : (skill === 'reading' ? 'R' : 'S')];
             const prompt = `Generate an IELTS ${skill} Task. Level: Band ${target}. JSON format: {"title":"","prompt":""}`;
-            const res = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
+            
+            const model = (skill === 'speaking') ? this.userSettings.MODEL_AUDIO : this.userSettings.MODEL_GEN;
+            const res = await this.callGemini(prompt, true, model);
+            
             this.currentTasks[skill] = res;
             if (skill === 'writing') {
                 document.getElementById('writing-task-container').classList.remove('hidden');
@@ -234,7 +251,7 @@ class IELTSCoach {
                 document.getElementById('writing-prompt-body').textContent = res.prompt;
                 document.getElementById('btn-submit-writing').disabled = false;
             }
-        } catch (err) { alert("Generation failed. Check API Key/Model."); }
+        } catch (err) { alert("Generation failed. Check API Key/Model settings."); }
         finally { btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); }
     }
 
@@ -262,8 +279,8 @@ class IELTSCoach {
         panel.classList.remove('hidden');
         panel.innerHTML = "AI Evaluator is working...";
         try {
-            const prompt = `IELTS Examiner Mode. Evaluate this essay for task: ${this.currentTasks.writing?.prompt}. Essay: "${essay}". Return JSON with: overall_band (number), criteria (object with band and feedback for tr, cc, lr, gra), summary_ja, summary_en.`;
-            const feedback = await this.callGemini(prompt, true, this.userSettings.MODEL_EVAL);
+            const prompt = `IELTS Examiner Mode. Evaluate essay for task: ${this.currentTasks.writing?.prompt}. Essay: "${essay}". Return JSON score and feedback.`;
+            const feedback = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
             this.renderFeedback(feedback);
         } catch (err) { panel.innerHTML = "Evaluation error."; }
     }
@@ -273,7 +290,6 @@ class IELTSCoach {
         const score = feedback.overall_band || feedback.score || "N/A";
         const getString = (v) => (typeof v === 'string' ? v : (v?.text || v?.feedback || JSON.stringify(v)));
         const summary = this.currentLang === 'ja' ? getString(feedback.summary_ja) : getString(feedback.summary_en);
-        
         let html = `<div class="feedback-header"><h3>Band Score: ${score}</h3><p>${summary}</p></div>`;
         html += `<div class="crit-grid">`;
         if (feedback.criteria) {
@@ -290,7 +306,7 @@ class IELTSCoach {
         if (!this.supabase) return;
         const { data } = await this.supabase.from('practice_sessions').select('*').order('created_at', { ascending: false }).limit(3);
         const list = document.getElementById('recommendation-list');
-        if (list) list.innerHTML = data && data.length ? data.map(d => `<div class='rec-item'>Past: ${d.score}</div>`).join('') : 'No history yet.';
+        if (list) list.innerHTML = data && data.length ? data.map(d => `<div>Past: ${d.score}</div>`).join('') : 'No history yet.';
     }
 }
 

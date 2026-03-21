@@ -56,6 +56,12 @@
                 <div class="header-left">
                     <h2 id="view-title" data-i18n="dashboard">ダッシュボード</h2>
                 </div>
+                <!-- Global Font Size Controls -->
+                <div class="header-right zoom-controls">
+                    <button id="zoom-out" class="btn-zoom" title="文字を小さく"><i data-lucide="minus"></i></button>
+                    <button id="zoom-reset" class="btn-zoom" title="リセット">A</button>
+                    <button id="zoom-in" class="btn-zoom" title="文字を大きく"><i data-lucide="plus"></i></button>
+                </div>
             </header>
 
             <!-- Dashboard View -->
@@ -157,12 +163,14 @@
                     <div class="settings-section">
                         <h4 class="section-title">AI モデル設定</h4>
                         <div class="settings-group">
-                            <label>AI Model (Generation/Assistant)</label>
+                            <label>Text Generation Model (Writing / Reading)</label>
                             <select id="model-gen" class="model-select"></select>
+                            <p class="settings-sub">文章生成やエッセイの添削に使用します。</p>
                         </div>
                         <div class="settings-group">
-                            <label>AI Model (Evaluation/Speaking)</label>
-                            <select id="model-eval" class="model-select"></select>
+                            <label>Audio / Speaking Model (Speaking Practice)</label>
+                            <select id="model-audio" class="model-select"></select>
+                            <p class="settings-sub">Gemini 2.0 Flash Native Audio などの高度な音声対話に使用します。</p>
                         </div>
                     </div>
 

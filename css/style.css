@@ -162,6 +162,50 @@ textarea, input, select, button {
     margin-bottom: 2.5rem;
 }
 
+/* Header Zoom Controls */
+.zoom-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: var(--bg-card);
+    padding: 0.4rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+}
+
+.btn-zoom {
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-secondary);
+    width: 32px;
+    height: 32px;
+    display: grid;
+    place-items: center;
+    border-radius: 0.4rem;
+    cursor: pointer;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.btn-zoom:hover {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    border-color: var(--border);
+}
+
+.btn-zoom i {
+    width: 16px;
+    height: 16px;
+}
+
+#zoom-reset {
+    font-size: 0.9rem;
+    border-left: 1px solid var(--border);
+    border-right: 1px solid var(--border);
+    border-radius: 0;
+    width: 40px;
+}
+
 .user-badge {
     display: flex;
     align-items: center;
@@ -446,6 +490,13 @@ textarea, input, select, button {
     font-weight: 600;
     color: var(--text-secondary);
     text-transform: uppercase;
+}
+
+.settings-sub {
+    font-size: 0.75rem;
+    color: var(--primary-light);
+    margin-top: 0.25rem;
+    opacity: 0.8;
 }
 
 .settings-input, .model-select {
