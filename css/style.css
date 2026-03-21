@@ -293,5 +293,121 @@ body {
     box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
 }
 
+/* Dashboard Target Inputs */
+.score-select {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    border: 1px solid var(--border);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    font-weight: 700;
+    cursor: pointer;
+    width: 60px;
+}
+
+.intro-card {
+    margin-bottom: 1.5rem;
+    border-left: 4px solid var(--primary);
+}
+
+/* Action Bar */
+.action-bar {
+    margin-bottom: 1.5rem;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--secondary);
+    border: 1px solid var(--secondary);
+    padding: 0.75rem 1.25rem;
+    border-radius: 0.75rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.btn-secondary:hover {
+    background: rgba(20, 184, 166, 0.1);
+    transform: scale(1.02);
+}
+
+/* Task Display */
+.task-display {
+    border-left: 4px solid var(--secondary);
+    margin-bottom: 1.5rem;
+    animation: slideIn 0.3s ease-out;
+}
+
+@keyframes slideIn {
+    from { opacity: 0; transform: translateX(-10px); }
+    to { opacity: 1; transform: translateX(0); }
+}
+
+.badge {
+    background-color: var(--primary);
+    color: white;
+    font-size: 0.65rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 1rem;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.task-body {
+    margin-top: 1rem;
+    font-size: 1.1rem;
+    color: var(--text-primary);
+    line-height: 1.8;
+}
+
+/* Feedback Styling */
+.feedback-panel {
+    margin-top: 2rem;
+    border-top: 2px solid var(--primary);
+}
+
+.crit-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.crit-box {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1rem;
+    border-radius: 0.75rem;
+    border: 1px solid var(--border);
+}
+
+.crit-box strong {
+    color: var(--primary);
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.upgrades {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    background: rgba(16, 185, 129, 0.1);
+    border-radius: 0.75rem;
+}
+
+.upgrades h4 { color: var(--success); }
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.spin {
+    animation: spin 1s linear infinite;
+}
+
 /* Utils */
-.hidden { display: none; }
+.hidden { display: none !important; }
