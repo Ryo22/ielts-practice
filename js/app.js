@@ -241,8 +241,8 @@ class IELTSCoach {
             const target = this.userSettings[skill === 'writing' ? 'W' : (skill === 'reading' ? 'R' : 'S')];
             const prompt = `Generate an IELTS ${skill} Task. Level: Band ${target}. JSON format: {"title":"","prompt":""}`;
             
-            const model = (skill === 'speaking') ? this.userSettings.MODEL_AUDIO : this.userSettings.MODEL_GEN;
-            const res = await this.callGemini(prompt, true, model);
+            // Generate topic using the text model for all skills
+            const res = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
             
             this.currentTasks[skill] = res;
             if (skill === 'writing') {
