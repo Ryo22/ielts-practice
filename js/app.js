@@ -192,25 +192,36 @@ class IELTSCoach {
         }
     }
 
-    async callGemini(prompt, isJson = false) {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+    async callGemini(prompt, isJson = false, model = 'gemini-1.5-flash-latest') {
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
         
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: {
-                    temperature: 0.7,
-                    responseMimeType: isJson ? "application/json" : "text/plain"
-                }
-            })
-        });
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: prompt }] }],
+                    generationConfig: {
+                        temperature: 0.7,
+                        responseMimeType: isJson ? "application/json" : "text/plain"
+                    }
+                })
+            });
 
-        if (!response.ok) throw new Error("Gemini API Error");
-        const data = await response.json();
-        const text = data.candidates[0].content.parts[0].text;
-        return isJson ? JSON.parse(text) : text;
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(`Gemini API Error: ${response.status} ${errorData.error?.message || ''}`);
+            }
+
+            const data = await response.json();
+            if (!data.candidates || data.candidates.length === 0) throw new Error("No response from AI");
+            
+            const text = data.candidates[0].content.parts[0].text;
+            return isJson ? JSON.parse(text) : text;
+        } catch (err) {
+            console.error("Gemini Fetch Error:", err);
+            throw err;
+        }
     }
 
     /** Writing Evaluation */
@@ -251,7 +262,7 @@ class IELTSCoach {
                 }
             `;
 
-            const feedback = await this.callGemini(evalPrompt, true);
+            const feedback = await this.callGemini(evalPrompt, true, 'gemini-1.5-pro-latest');
             this.renderFeedback(feedback);
             await this.saveToSupabase('writing', essayText, feedback);
 
