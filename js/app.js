@@ -14,10 +14,11 @@ class IELTSCoach {
     }
 
     async init() {
-        this.applySavedKeys(); // Apply keys from storage
+        this.applySavedKeys();
         this.initSupabase();
         this.initScoreSelectors();
-        this.initAPIFields(); // Set UI values
+        this.initAPIFields();
+        this.initAppearance();
         this.bindEvents();
         this.applyLanguage();
         this.updateView();
@@ -32,8 +33,26 @@ class IELTSCoach {
         await this.loadPracticeHistory();
     }
 
+    loadSettings() {
+        const saved = localStorage.getItem('iac_settings');
+        const defaultSettings = {
+            ...CONFIG.SYSTEM_TARGET,
+            MODEL_GEN: 'gemini-1.5-flash-latest',
+            MODEL_EVAL: 'gemini-1.5-pro-latest',
+            FONT_SIZE: 16
+        };
+        try {
+            return saved ? JSON.parse(saved) : defaultSettings;
+        } catch {
+            return defaultSettings;
+        }
+    }
+
+    saveSettings() {
+        localStorage.setItem('iac_settings', JSON.stringify(this.userSettings));
+    }
+
     applySavedKeys() {
-        // Load custom keys from storage and override CONFIG if present
         const savedKeys = localStorage.getItem('iac_keys');
         if (savedKeys) {
             const keys = JSON.parse(savedKeys);
@@ -43,16 +62,30 @@ class IELTSCoach {
         }
     }
 
-    getGeminiKey() {
-        return this.userSettings.GEMINI_KEY || CONFIG.GEMINI_API_KEY;
+    getGeminiKey() { return this.userSettings.GEMINI_KEY || CONFIG.GEMINI_API_KEY; }
+    getSupabaseURL() { return this.userSettings.SUPABASE_URL || CONFIG.SUPABASE_URL; }
+    getSupabaseKey() { return this.userSettings.SUPABASE_KEY || CONFIG.SUPABASE_ANON_KEY; }
+
+    initAppearance() {
+        const fontSize = this.userSettings.FONT_SIZE || 16;
+        this.applyFontSize(fontSize);
+        const slider = document.getElementById('input-font-size');
+        const valLabel = document.getElementById('font-size-val');
+        if (slider && valLabel) {
+            slider.value = fontSize;
+            valLabel.textContent = fontSize;
+            slider.addEventListener('input', (e) => {
+                const val = e.target.value;
+                valLabel.textContent = val;
+                this.applyFontSize(val);
+                this.userSettings.FONT_SIZE = parseInt(val);
+                this.saveSettings();
+            });
+        }
     }
 
-    getSupabaseURL() {
-        return this.userSettings.SUPABASE_URL || CONFIG.SUPABASE_URL;
-    }
-
-    getSupabaseKey() {
-        return this.userSettings.SUPABASE_KEY || CONFIG.SUPABASE_ANON_KEY;
+    applyFontSize(size) {
+        document.documentElement.style.setProperty('--base-font-size', `${size}px`);
     }
 
     initAPIFields() {
@@ -64,68 +97,11 @@ class IELTSCoach {
         if (keyInput) keyInput.value = this.getSupabaseKey();
     }
 
-    loadSettings() {
-        const saved = localStorage.getItem('iac_settings');
-        const defaultSettings = {
-            ...CONFIG.SYSTEM_TARGET,
-            MODEL_GEN: 'gemini-1.5-flash-latest',
-            MODEL_EVAL: 'gemini-1.5-pro-latest'
-        };
-        return saved ? JSON.parse(saved) : defaultSettings;
-    }
-
-    saveSettings() {
-        localStorage.setItem('iac_settings', JSON.stringify(this.userSettings));
-    }
-
-    async fetchModels() {
-        const apiKey = this.getGeminiKey();
-        if (!apiKey) return;
-        try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
-            const res = await fetch(url);
-            if (!res.ok) throw new Error("Could not fetch models");
-            const data = await res.json();
-            // Filter only generateContent supported models
-            this.availableModels = data.models
-                .filter(m => m.supportedGenerationMethods.includes('generateContent'))
-                .map(m => m.name.replace('models/', ''));
-            
-            console.log("Available Gemini Models:", this.availableModels);
-        } catch (err) {
-            console.warn("Model fetch failed, using defaults:", err.message);
-            this.availableModels = ['gemini-1.5-flash-latest', 'gemini-1.5-pro-latest', 'gemini-2.0-flash-exp'];
-        }
-    }
-
-    initModelSelectors() {
-        const genSelect = document.getElementById('model-gen');
-        const evalSelect = document.getElementById('model-eval');
-        if (!genSelect || !evalSelect) return;
-
-        this.availableModels.forEach(m => {
-            const opt1 = new Option(m, m);
-            const opt2 = new Option(m, m);
-            if (m === this.userSettings.MODEL_GEN) opt1.selected = true;
-            if (m === this.userSettings.MODEL_EVAL) opt2.selected = true;
-            genSelect.add(opt1);
-            evalSelect.add(opt2);
-        });
-
-        genSelect.addEventListener('change', (e) => {
-            this.userSettings.MODEL_GEN = e.target.value;
-            this.saveSettings();
-        });
-        evalSelect.addEventListener('change', (e) => {
-            this.userSettings.MODEL_EVAL = e.target.value;
-            this.saveSettings();
-        });
-    }
-
     initScoreSelectors() {
         ['l', 'r', 'w', 's'].forEach(skill => {
             const select = document.getElementById(`target-${skill}`);
             if (!select) return;
+            select.innerHTML = '';
             for (let i = 4.0; i <= 9.0; i += 0.5) {
                 const opt = new Option(i.toFixed(1), i.toFixed(1));
                 if (parseFloat(this.userSettings[skill.toUpperCase()]) === i) opt.selected = true;
@@ -142,12 +118,12 @@ class IELTSCoach {
     calculateOverall() {
         const { L, R, W, S } = this.userSettings;
         const avg = (L + R + W + S) / 4;
+        // IELTS Rounding: round to nearest 0.25 up.
+        // 6.25 -> 6.5, 6.75 -> 7.0, 6.125 -> 6.0 (Standard)
         const rounded = Math.round(avg * 4) / 4;
-        let final = rounded;
-        if (rounded % 1 === 0.25 || rounded % 1 === 0.75) final += 0.25;
-        document.getElementById('target-overall-val').textContent = final.toFixed(1);
+        document.getElementById('target-overall-val').textContent = rounded.toFixed(1);
         const progress = document.getElementById('overall-progress');
-        if (progress) progress.style.width = `${(final / 9) * 100}%`;
+        if (progress) progress.style.width = `${(rounded / 9) * 100}%`;
     }
 
     initSupabase() {
@@ -163,17 +139,12 @@ class IELTSCoach {
                 this.switchView(item.getAttribute('data-view'));
             });
         });
-
-        document.getElementById('lang-ja').addEventListener('click', () => this.switchLanguage('ja'));
-        document.getElementById('lang-en').addEventListener('click', () => this.switchLanguage('en'));
-
+        document.getElementById('lang-ja')?.addEventListener('click', () => this.switchLanguage('ja'));
+        document.getElementById('lang-en')?.addEventListener('click', () => this.switchLanguage('en'));
         ['writing', 'reading', 'speaking'].forEach(skill => {
             document.getElementById(`btn-gen-${skill}`)?.addEventListener('click', () => this.generateProblem(skill));
         });
-
         document.getElementById('btn-submit-writing')?.addEventListener('click', () => this.handleWritingSubmission());
-        
-        // Key Saving
         document.getElementById('btn-save-keys')?.addEventListener('click', () => this.handleSaveKeys());
     }
 
@@ -184,7 +155,7 @@ class IELTSCoach {
             supabase_key: document.getElementById('input-supabase-key').value.trim()
         };
         localStorage.setItem('iac_keys', JSON.stringify(keys));
-        alert("API credentials saved! The app will reload to apply changes.");
+        alert("Credentials saved. Reloading...");
         window.location.reload();
     }
 
@@ -193,10 +164,8 @@ class IELTSCoach {
         localStorage.setItem('iac_lang', lang);
         this.applyLanguage();
         this.updateView();
-        document.getElementById('lang-ja').classList.toggle('active', lang === 'ja');
-        document.getElementById('lang-en').classList.toggle('active', lang === 'en');
-        document.documentElement.lang = lang;
-        lucide.createIcons();
+        document.getElementById('lang-ja')?.classList.toggle('active', lang === 'ja');
+        document.getElementById('lang-en')?.classList.toggle('active', lang === 'en');
     }
 
     applyLanguage() {
@@ -210,56 +179,69 @@ class IELTSCoach {
     switchView(view) {
         this.currentView = view;
         document.querySelectorAll('.view-section').forEach(s => s.classList.add('hidden'));
-        document.getElementById(`${view}-view`).classList.remove('hidden');
+        document.getElementById(`${view}-view`)?.classList.remove('hidden');
         document.querySelectorAll('.nav-item').forEach(item => {
             item.classList.toggle('active', item.getAttribute('data-view') === view);
         });
         const trans = TRANSLATIONS[this.currentLang];
-        document.getElementById('view-title').textContent = trans[`${view}_module`] || trans[view] || view;
+        const titleEl = document.getElementById('view-title');
+        if (titleEl) titleEl.textContent = trans[`${view}_module`] || trans[view] || view;
         lucide.createIcons();
     }
 
-    updateView() {
-        this.switchView(this.currentView);
+    updateView() { this.switchView(this.currentView); }
+
+    async fetchModels() {
+        const apiKey = this.getGeminiKey();
+        if (!apiKey) return;
+        try {
+            const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
+            if (!res.ok) return;
+            const data = await res.json();
+            this.availableModels = data.models
+                .filter(m => m.supportedGenerationMethods.includes('generateContent'))
+                .map(m => m.name.replace('models/', ''));
+        } catch {
+            this.availableModels = ['gemini-1.5-flash-latest', 'gemini-2.0-flash-exp'];
+        }
+    }
+
+    initModelSelectors() {
+        const genSelect = document.getElementById('model-gen');
+        const evalSelect = document.getElementById('model-eval');
+        if (!genSelect || !evalSelect) return;
+        genSelect.innerHTML = ''; evalSelect.innerHTML = '';
+        this.availableModels.forEach(m => {
+            genSelect.add(new Option(m, m, m === this.userSettings.MODEL_GEN, m === this.userSettings.MODEL_GEN));
+            evalSelect.add(new Option(m, m, m === this.userSettings.MODEL_EVAL, m === this.userSettings.MODEL_EVAL));
+        });
+        genSelect.addEventListener('change', (e) => { this.userSettings.MODEL_GEN = e.target.value; this.saveSettings(); });
+        evalSelect.addEventListener('change', (e) => { this.userSettings.MODEL_EVAL = e.target.value; this.saveSettings(); });
     }
 
     async generateProblem(skill) {
         const btn = document.getElementById(`btn-gen-${skill}`);
-        const originalContent = btn.innerHTML;
+        const originalText = btn.innerHTML;
         try {
-            btn.disabled = true;
-            btn.innerHTML = `<i data-lucide="loader-2" class="spin"></i> AI Generating...`;
-            lucide.createIcons();
-
-            const prompt = `Generate a professional IELTS ${skill.toUpperCase()} task. Target Band: ${this.userSettings[skill === 'writing' ? 'W' : (skill === 'reading' ? 'R' : 'S')]}. Return JSON: {"title":"...","prompt":"...","tips":"..."}`;
-            // Use MODEL_GEN from settings
+            btn.disabled = true; btn.innerHTML = "Generating...";
+            const target = this.userSettings[skill === 'writing' ? 'W' : (skill === 'reading' ? 'R' : 'S')];
+            const prompt = `Generate an IELTS ${skill} Task. Level: Band ${target}. JSON format: {"title":"","prompt":""}`;
             const res = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
             this.currentTasks[skill] = res;
-
             if (skill === 'writing') {
                 document.getElementById('writing-task-container').classList.remove('hidden');
                 document.getElementById('writing-prompt-title').textContent = res.title;
                 document.getElementById('writing-prompt-body').textContent = res.prompt;
                 document.getElementById('btn-submit-writing').disabled = false;
-            } else if (skill === 'reading') {
-                document.getElementById('reading-content').innerHTML = `<div class="card"><h4>${res.title}</h4><p>${res.prompt}</p></div>`;
             }
-
-        } catch (err) {
-            console.error(err);
-            alert("Model usage error. Please try selecting a different model in Settings.");
-        } finally {
-            btn.disabled = false;
-            btn.innerHTML = originalContent;
-            lucide.createIcons();
-        }
+        } catch (err) { alert("Generation failed. Check API Key/Model."); }
+        finally { btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); }
     }
 
     async callGemini(prompt, isJson = false, model = 'gemini-1.5-flash-latest') {
         const apiKey = this.getGeminiKey();
-        if (!apiKey) throw new Error("GEMINI_API_KEY is not set. Please update in Settings.");
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
-        const response = await fetch(url, {
+        if (!apiKey) throw new Error("Key missing");
+        const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -267,39 +249,48 @@ class IELTSCoach {
                 generationConfig: { temperature: 0.7, responseMimeType: isJson ? "application/json" : "text/plain" }
             })
         });
-        if (!response.ok) throw new Error(`Model ${model} failed`);
-        const data = await response.json();
+        if (!res.ok) throw new Error("API fail");
+        const data = await res.json();
         const text = data.candidates[0].content.parts[0].text;
         return isJson ? JSON.parse(text) : text;
     }
 
     async handleWritingSubmission() {
-        const essayText = document.getElementById('writing-input').value.trim();
-        if (!essayText || !this.currentTasks.writing) return;
-
-        const feedbackPanel = document.getElementById('writing-feedback');
-        feedbackPanel.classList.remove('hidden');
-        feedbackPanel.innerHTML = '<div class="loading-spinner">Analyzing with AI...</div>';
-
+        const essay = document.getElementById('writing-input').value.trim();
+        if (!essay) return;
+        const panel = document.getElementById('writing-feedback');
+        panel.classList.remove('hidden');
+        panel.innerHTML = "AI Evaluator is working...";
         try {
-            const evalPrompt = `Evaluate this IELTS essay for task: ${this.currentTasks.writing.prompt}. Essay: "${essayText}". Return JSON score and feedback.`;
-            // Use MODEL_EVAL from settings
-            const feedback = await this.callGemini(evalPrompt, true, this.userSettings.MODEL_EVAL);
+            const prompt = `IELTS Examiner Mode. Evaluate this essay for task: ${this.currentTasks.writing?.prompt}. Essay: "${essay}". Return JSON with: overall_band (number), criteria (object with band and feedback for tr, cc, lr, gra), summary_ja, summary_en.`;
+            const feedback = await this.callGemini(prompt, true, this.userSettings.MODEL_EVAL);
             this.renderFeedback(feedback);
-        } catch (err) {
-            feedbackPanel.innerHTML = `<div class="error">Evaluation failed with chosen model.</div>`;
-        }
+        } catch (err) { panel.innerHTML = "Evaluation error."; }
     }
 
     renderFeedback(feedback) {
-        document.getElementById('writing-feedback').innerHTML = `<h3>Band Score: ${feedback.overall_band || feedback.score}</h3><p>${feedback.summary_ja || feedback.feedback}</p>`;
+        const panel = document.getElementById('writing-feedback');
+        const score = feedback.overall_band || feedback.score || "N/A";
+        const getString = (v) => (typeof v === 'string' ? v : (v?.text || v?.feedback || JSON.stringify(v)));
+        const summary = this.currentLang === 'ja' ? getString(feedback.summary_ja) : getString(feedback.summary_en);
+        
+        let html = `<div class="feedback-header"><h3>Band Score: ${score}</h3><p>${summary}</p></div>`;
+        html += `<div class="crit-grid">`;
+        if (feedback.criteria) {
+            Object.entries(feedback.criteria).forEach(([k, v]) => {
+                html += `<div class="crit-box"><strong>${k.toUpperCase()}: ${v.band || v.score || 'N/A'}</strong><p>${getString(v.feedback || v)}</p></div>`;
+            });
+        }
+        html += `</div>`;
+        panel.innerHTML = html;
+        panel.scrollIntoView({ behavior: 'smooth' });
     }
 
     async loadPracticeHistory() {
         if (!this.supabase) return;
         const { data } = await this.supabase.from('practice_sessions').select('*').order('created_at', { ascending: false }).limit(3);
         const list = document.getElementById('recommendation-list');
-        if (list) list.innerHTML = data && data.length ? data.map(d => `<div>Past: ${d.score}</div>`).join('') : 'No history.';
+        if (list) list.innerHTML = data && data.length ? data.map(d => `<div class='rec-item'>Past: ${d.score}</div>`).join('') : 'No history yet.';
     }
 }
 
