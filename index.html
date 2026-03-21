@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IELTS Adaptive Coach (IAC) - Test Mode</title>
+    <title>IELTS Adaptive Coach (IAC) - Final Test Mode</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -14,59 +14,37 @@
 </head>
 <body class="cbt-mode">
     <div id="app" class="app-container">
-        <!-- Sidebar Navigation (Application Shell) -->
+        <!-- Sidebar Navigation -->
         <aside class="sidebar">
-            <div class="logo-section">
-                <i data-lucide="graduation-cap" class="logo-icon"></i>
-                <h1 class="logo-text">IAC</h1>
-            </div>
+            <div class="logo-section"><i data-lucide="graduation-cap" class="logo-icon"></i><h1 class="logo-text">IAC</h1></div>
             <nav class="nav-links">
-                <a href="#" class="nav-item active" data-view="dashboard">
-                    <i data-lucide="layout-dashboard"></i>
-                    <span data-i18n="dashboard">ダッシュボード</span>
-                </a>
-                <a href="#" class="nav-item" data-view="writing">
-                    <i data-lucide="pen-tool"></i>
-                    <span data-i18n="writing_module">Writing</span>
-                </a>
-                <a href="#" class="nav-item" data-view="reading">
-                    <i data-lucide="book-open"></i>
-                    <span data-i18n="reading_module">Reading</span>
-                </a>
-                <a href="#" class="nav-item" data-view="speaking">
-                    <i data-lucide="mic"></i>
-                    <span data-i18n="speaking_module">Speaking</span>
-                </a>
-                <a href="#" class="nav-item" data-view="settings">
-                    <i data-lucide="settings"></i>
-                    <span data-i18n="settings">設定</span>
-                </a>
+                <a href="#" class="nav-item active" data-view="dashboard"><i data-lucide="layout-dashboard"></i><span data-i18n="dashboard">ダッシュボード</span></a>
+                <a href="#" class="nav-item" data-view="writing"><i data-lucide="pen-tool"></i><span data-i18n="writing_module">Writing</span></a>
+                <a href="#" class="nav-item" data-view="reading"><i data-lucide="book-open"></i><span data-i18n="reading_module">Reading</span></a>
+                <a href="#" class="nav-item" data-view="speaking"><i data-lucide="mic"></i><span data-i18n="speaking_module">Speaking</span></a>
+                <a href="#" class="nav-item" data-view="settings"><i data-lucide="settings"></i><span data-i18n="settings">設定</span></a>
             </nav>
             <div class="sidebar-footer">
-                <div class="lang-switch">
-                    <button id="lang-ja" class="btn-lang active">JA</button>
-                    <button id="lang-en" class="btn-lang">EN</button>
-                </div>
+                <div class="lang-switch"><button id="lang-ja" class="btn-lang active">JA</button><button id="lang-en" class="btn-lang">EN</button></div>
             </div>
         </aside>
 
         <!-- Main Content Area -->
         <main class="main-content">
-            <!-- Official CBT Header -->
+            <!-- CBT Official Header -->
             <header class="cbt-header">
                 <div class="cbt-header-left">
                     <div class="cbt-logo">IELTS</div>
                     <div class="cbt-test-info">Test taker ID: <span class="test-user">IAC_USER_2025</span></div>
                 </div>
+                <!-- Official Timer -->
+                <div id="cbt-timer" class="cbt-timer">60:00</div>
                 <div class="cbt-header-right">
                     <div class="zoom-controls">
                         <button id="zoom-out" class="btn-zoom"><i data-lucide="minus"></i></button>
                         <button id="zoom-reset" class="btn-zoom">A</button>
                         <button id="zoom-in" class="btn-zoom"><i data-lucide="plus"></i></button>
                     </div>
-                    <button class="cbt-icon-btn"><i data-lucide="wifi"></i></button>
-                    <button class="cbt-icon-btn"><i data-lucide="bell"></i></button>
-                    <button class="cbt-icon-btn"><i data-lucide="menu"></i></button>
                 </div>
             </header>
 
@@ -74,65 +52,71 @@
             <section id="dashboard-view" class="view-section">
                 <div class="card intro-card">
                     <h3 data-i18n="target_overall_settings">目標スコア設定</h3>
-                    <p data-i18n="overall_formula">各セクションの目標を入力してください。</p>
+                    <p data-i18n="overall_formula">各セクションの目標帯域を選択してください。</p>
                 </div>
-                <!-- Simplified for brevity -->
                 <div class="stats-grid">
-                    <div class="stat-card primary">
-                        <span class="stat-label" data-i18n="target_overall">目標 Overall</span>
-                        <span id="target-overall-val" class="stat-value">7.5</span>
-                    </div>
-                    <div class="stat-card input-card">L <select id="target-l" class="score-select"></select></div>
-                    <div class="stat-card input-card">R <select id="target-r" class="score-select"></select></div>
-                    <div class="stat-card input-card">W <select id="target-w" class="score-select"></select></div>
-                    <div class="stat-card input-card">S <select id="target-s" class="score-select"></select></div>
+                    <div class="stat-card primary"><span class="stat-label">Overall</span><span id="target-overall-val" class="stat-value">7.5</span></div>
+                    <div class="stat-card">L <select id="target-l" class="score-select"></select></div>
+                    <div class="stat-card">R <select id="target-r" class="score-select"></select></div>
+                    <div class="stat-card">W <select id="target-w" class="score-select"></select></div>
+                    <div class="stat-card">S <select id="target-s" class="score-select"></select></div>
                 </div>
             </section>
 
             <!-- Writing View -->
             <section id="writing-view" class="view-section hidden">
-                <div class="cbt-instruction">Part 2: Read the text and answer questions.</div>
+                <div class="cbt-instruction">Part 2: You should spend about 40 minutes on this task.</div>
                 <div class="action-bar"><button id="btn-gen-writing" class="btn-secondary">課題生成</button></div>
-                <div id="writing-task-container" class="cbt-workspace-split">
-                    <div id="writing-prompt-area" class="cbt-prompt-card">
+                <div class="cbt-workspace-split">
+                    <div class="cbt-prompt-card">
                         <h4 id="writing-prompt-title"></h4>
                         <div id="writing-prompt-body" class="task-body"></div>
                     </div>
                     <div class="cbt-writing-area">
-                        <textarea id="writing-input" class="cbt-textarea" placeholder="Type your essay here..."></textarea>
-                        <button id="btn-submit-writing" class="btn-primary" disabled>Finish Section</button>
+                        <textarea id="writing-input" class="cbt-textarea" placeholder="Type your response here..."></textarea>
+                        <div class="cbt-toolbar-bottom">
+                            <div class="word-count">Word count: <span id="word-count-val">0</span></div>
+                            <button id="btn-submit-writing" class="btn-primary" disabled>Finalize Response</button>
+                        </div>
                     </div>
                 </div>
                 <div id="writing-feedback" class="card feedback-panel hidden"></div>
             </section>
 
-            <!-- Reading View (CBT Split Screen) -->
+            <!-- Reading View -->
             <section id="reading-view" class="view-section hidden">
-                <div class="cbt-instruction">Part 1: Read the passage and answer questions 1-10.</div>
-                <div class="action-bar"><button id="btn-gen-reading" class="btn-secondary">読解生成</button></div>
-                <div id="reading-cbt-container" class="cbt-split-viewer">
-                    <div class="cbt-passage-area">
-                        <div id="reading-passage-content" class="task-body">練習を開始するには「読解生成」をクリックしてください。</div>
-                    </div>
-                    <div class="cbt-question-area">
-                        <div id="reading-questions-content" class="task-body">設問がここに表示されます。</div>
-                    </div>
+                <div class="cbt-instruction">Part 1: Questions 1-10. Complete the notes. ONE WORD ONLY.</div>
+                <div class="action-bar"><button id="btn-gen-reading" class="btn-secondary">読解試験 開始</button></div>
+                <div class="cbt-split-viewer">
+                    <div class="cbt-passage-area"><div id="reading-passage-content" class="task-body">Reading passage will appear here.</div></div>
+                    <div class="cbt-question-area"><div id="reading-questions-content" class="task-body">Questions will appear here.</div></div>
                 </div>
-                <!-- CBT Navigator Bar -->
-                <footer class="cbt-navigator">
-                    <div class="cbt-nav-left">Part 1 <div class="cbt-nav-dots"><span class="active">1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></div>
-                    <div class="cbt-nav-right"><button class="cbt-btn-check"><i data-lucide="check"></i> Review</button></div>
-                </footer>
             </section>
 
-            <!-- Speaking View -->
+            <!-- Speaking View (AI VOICE MODE) -->
             <section id="speaking-view" class="view-section hidden">
-                 <div class="cbt-instruction">Speaking Topic Discussion</div>
-                 <div class="action-bar"><button id="btn-gen-speaking" class="btn-secondary">トピック生成</button></div>
-                 <div id="speaking-task-container" class="cbt-prompt-card hidden">
-                    <h4 id="speaking-prompt-title"></h4>
-                    <p id="speaking-prompt-body" class="task-body"></p>
+                 <div class="cbt-instruction">Speaking Test: Face-to-face simulation with AI Examiner</div>
+                 <div class="action-bar"><button id="btn-start-speaking" class="btn-primary">試験開始 (Audio Mode)</button></div>
+                 
+                 <div class="cbt-voice-container">
+                    <!-- AI Examiner -->
+                    <div class="cbt-examiner-bubble card">
+                        <div class="examiner-meta"><i data-lucide="user"></i> Examiner</div>
+                        <p id="examiner-text">試験を開始するには上のボタンを押してください。あなたの声が認識され、対話が始まります。</p>
+                        <div id="examiner-status" class="status-indicator hidden">AI is speaking...</div>
+                    </div>
+
+                    <!-- User Mic -->
+                    <div class="cbt-user-mic-area">
+                        <button id="btn-mic" class="mic-btn" disabled>
+                            <i data-lucide="mic"></i>
+                        </button>
+                        <p id="user-transcript" class="transcript-preview"></p>
+                        <div id="mic-status" class="status-indicator hidden">Recording...</div>
+                    </div>
                  </div>
+
+                 <div id="speaking-feedback" class="card feedback-panel hidden"></div>
             </section>
 
             <!-- Settings View -->

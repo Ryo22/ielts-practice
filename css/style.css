@@ -66,6 +66,17 @@ body {
     display: flex; justify-content: space-between; align-items: center;
     padding: 0 1.5rem; flex-shrink: 0;
 }
+
+.cbt-timer {
+    font-family: 'JetBrains Mono', monospace;
+    background: #111;
+    color: #ff0000;
+    padding: 0.25rem 1rem;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    border: 1px solid #333;
+}
 .cbt-logo { color: var(--ielts-red); font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; }
 .cbt-test-info { margin-left: 2rem; border-left: 1px solid #ddd; padding-left: 1rem; color: #666; font-size: 0.9rem; }
 .cbt-header-right { display: flex; align-items: center; gap: 1rem; }
@@ -119,11 +130,108 @@ body {
     display: grid; grid-template-columns: 1fr 1fr; flex: 1; overflow: hidden;
 }
 .cbt-prompt-card { background: #fff; padding: 2.5rem; border-right: 1px solid #eee; overflow-y: auto; }
-.cbt-writing-area { background: #fafafa; padding: 2.5rem; display: flex; flex-direction: column; }
-.cbt-textarea {
-    flex: 1; border: 1px solid #ccc; border-radius: 4px; padding: 1.5rem;
-    font-size: 1.1rem; line-height: 1.6; resize: none; margin-bottom: 1rem;
+/* CBT Writing Toolbar */
+.cbt-toolbar-bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #ddd;
+}
+
+.word-count {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+/* Speaking Voice UI */
+.cbt-voice-container {
+    max-width: 800px;
+    margin: 3rem auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    align-items: center;
+}
+
+.cbt-examiner-bubble {
+    width: 100%;
+    padding: 2.5rem;
     background: #fff;
+    border: 1px solid var(--ielts-border);
+    border-radius: 1rem;
+    position: relative;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+.examiner-meta {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--ielts-blue);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.status-indicator {
+    font-size: 0.75rem;
+    color: var(--ielts-red);
+    font-weight: 600;
+    margin-top: 1rem;
+    animation: blink 1s infinite;
+}
+
+.cbt-user-mic-area {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.mic-btn {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--ielts-blue);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    box-shadow: 0 6px 15px rgba(0,118,157,0.3);
+    transition: var(--transition);
+}
+
+.mic-btn:disabled {
+    background: #ccc;
+    box-shadow: none;
+}
+
+.mic-btn:active {
+    transform: scale(0.9);
+}
+
+.transcript-preview {
+    font-style: italic;
+    color: #444;
+    min-height: 1.5rem;
+    text-align: center;
+}
+
+@keyframes blink { 50% { opacity: 0; } }
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(0, 118, 157, 0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(0, 118, 157, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(0, 118, 157, 0); }
+}
+
+.recording .mic-btn {
+    animation: pulse 1.5s infinite;
+    background: var(--ielts-red);
 }
 
 /* Typography for Task Content */
