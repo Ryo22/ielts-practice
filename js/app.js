@@ -207,30 +207,40 @@ class IELTSCoach {
             btn.disabled = true; btn.innerHTML = "Generating...";
             const target = this.userSettings[skill === 'reading' ? 'R' : (skill === 'writing' ? 'W' : 'S')];
             
-            // Rich Topic Diversity Pool
-            const topics = [
-                "Marine Biology & Oceanography", "Urban Planning & Smart Cities", "Linguistics & Evolution of Language",
-                "Space Exploration & Colonization", "Archaeology & Ancient Civilizations", "Artificial Intelligence & Ethics",
-                "Sustainable Agriculture & Food Security", "Consumer Psychology & Marketing", "Renaissance Art & History",
-                "Renewable Energy Infrastructure", "Cognitive Neuroscience & Learning", "Microeconomics & Global Trade",
-                "Deep Sea Ecosystems", "Architecture & Sustainable Design", "Sports Physiology & Performance",
-                "The History of Printing & Media", "Environmental Law & Policy", "Sociology of Rural Communities",
-                "Robotics in Medicine", "Alternative Education Systems", "Zoology & Extinction Patterns",
-                "Future of Transportation", "Nanotechnology in Textiles", "Astrophysics & Dark Matter",
-                "Evolutionary Psychology", "Global Supply Chain Logistics", "Ancient Philosophy & Modern Life"
-            ];
-            const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+            // Skill-Specific Topic Pools (Aligned with Official IELTS Trends)
+            const topicPools = {
+                reading: [
+                    "The psychology of human memory and cognition", "Technological advancements in vertical farming", 
+                    "Ancient maritime trade routes in Southeast Asia", "The impact of light pollution on nocturnal animals",
+                    "The evolution of commercial aviation safety", "Advancements in deep-sea volcanic exploration",
+                    "Biomimicry: Nature's influence on modern architecture", "The socio-economic history of the Silk Road",
+                    "Climate change impact on glacial migration", "The linguistic evolution of lost languages"
+                ],
+                writing: [
+                    "Government investment: Space exploration vs. Domestic poverty", "Remote work: Benefits and drawbacks for social cohesion",
+                    "The role of traditional art in the digital age", "Compulsory community service for university students",
+                    "Over-reliance on technology in early childhood education", "The ethical implications of genetic modification in food",
+                    "Urban vs. Rural living: The impact of migration on city infrastructure", "Should international travel be limited to protect the environment?"
+                ],
+                speaking: [
+                    "Part 1: Memories of childhood holidays and family trips", "Part 2: Describe a major environmental change you have witnessed",
+                    "Part 3: The influence of social media celebrities on consumer behavior", "Part 1: Traditional festivals and the importance of heritage",
+                    "Part 2: Describe a historical monument you visited and admire", "Part 3: The future of artificial intelligence in daily household tasks"
+                ]
+            };
+            
+            const pool = topicPools[skill] || topicPools.writing;
+            const randomTopic = pool[Math.floor(Math.random() * pool.length)];
 
-            // Refined CBT Output Format Prompt with Random Topic
+            // Refined CBT Output Format Prompt with Context-Specific Topic
             const prompt = `Act as an expert IELTS Examiner. 
-            CONTEXT: The world's most variable IELTS question generator.
+            CONTEXT: Providing highly realistic practice for the ${skill} section.
             TOPIC AREA: ${randomTopic}. 
-            TASK: Generate a highly authentic IELTS ${skill} Task. 
-            Constraint: Avoid common/generic topics. Be highly specific and academic.
-            Level: Band ${target}.
+            TASK: Generate an authentic IELTS ${skill} Task (Band ${target}). 
+            Instruction: Ensure the vocabulary and style match the actual IELTS ${skill} requirements perfectly.
             Structure with multiple paragraphs and clear headings.
             FOR READING: Passage and Questions must be separate.
-            Return JSON Format: {"title":"(Original Title)","passage":"(Academic Passage with \\n)","questions":"(Specific Questions 1-10)","prompt":"(Combined Task Description)"}`;
+            Return JSON Format: {"title":"(Title)","passage":"(Academic/Relevant Passage)","questions":"(Specific Questions)","prompt":"(Combined for Writing/Speaking)"}`;
             
             const res = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
             this.currentTasks[skill] = res;
