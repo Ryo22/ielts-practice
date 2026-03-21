@@ -37,6 +37,10 @@
                     <i data-lucide="mic"></i>
                     <span data-i18n="speaking_module">Speaking</span>
                 </a>
+                <a href="#" class="nav-item" data-view="settings">
+                    <i data-lucide="settings"></i>
+                    <span data-i18n="settings">設定</span>
+                </a>
             </nav>
             <div class="sidebar-footer">
                 <div class="lang-switch">
@@ -60,7 +64,7 @@
                     <h3 data-i18n="target_overall_settings">目標スコア設定</h3>
                     <p data-i18n="overall_formula">各セクションの目標を入力してください。Overallが自動計算されます。</p>
                 </div>
-
+                <!-- Target score stats simplified for brevity -->
                 <div class="stats-grid">
                     <div class="stat-card primary">
                         <div class="stat-info">
@@ -71,98 +75,66 @@
                             <div class="progress-bar"><div id="overall-progress" class="progress-fill" style="width: 80%;"></div></div>
                         </div>
                     </div>
-                    <!-- Target Inputs -->
                     <div class="stat-card input-card">
-                        <span class="stat-label">Listening</span>
+                        <span class="stat-label">L</span>
                         <select id="target-l" class="score-select"></select>
                     </div>
                     <div class="stat-card input-card">
-                        <span class="stat-label">Reading</span>
+                        <span class="stat-label">R</span>
                         <select id="target-r" class="score-select"></select>
                     </div>
                     <div class="stat-card input-card">
-                        <span class="stat-label">Writing</span>
+                        <span class="stat-label">W</span>
                         <select id="target-w" class="score-select"></select>
                     </div>
                     <div class="stat-card input-card">
-                        <span class="stat-label">Speaking</span>
+                        <span class="stat-label">S</span>
                         <select id="target-s" class="score-select"></select>
                     </div>
                 </div>
-
-                <div class="content-grid">
-                    <div class="card card-recommendation">
-                        <h3 data-i18n="recommendation">今日のおすすめ学習</h3>
-                        <div id="recommendation-list" class="rec-list">
-                            <!-- Populated by JS -->
-                        </div>
-                    </div>
-                </div>
+                <div class="card"><h3 data-i18n="recommendation">推奨学習</h3><div id="recommendation-list"></div></div>
             </section>
 
             <!-- Writing View -->
             <section id="writing-view" class="view-section hidden">
-                <div class="action-bar">
-                    <button id="btn-gen-writing" class="btn-secondary">
-                        <i data-lucide="sparkles"></i>
-                        <span data-i18n="start_practice">問題を生成する</span>
-                    </button>
-                </div>
-
+                <div class="action-bar"><button id="btn-gen-writing" class="btn-secondary"><i data-lucide="sparkles"></i>生成</button></div>
                 <div id="writing-task-container" class="card task-display hidden">
-                    <div class="task-header">
-                        <span class="badge">Writing Task 2</span>
-                        <h4 id="writing-prompt-title">...</h4>
-                    </div>
-                    <p id="writing-prompt-body" class="task-body"></p>
+                    <h4 id="writing-prompt-title"></h4><p id="writing-prompt-body"></p>
                 </div>
-
                 <div class="card workspace">
-                    <textarea id="writing-input" class="essay-textarea" data-i18n-placeholder="placeholder_essay" placeholder="エッセイを入力してください..."></textarea>
-                    <div class="workspace-footer">
-                        <button id="btn-submit-writing" class="btn-primary" disabled>
-                            <i data-lucide="send"></i>
-                            <span data-i18n="submit_essay">提出して添削を受ける</span>
-                        </button>
-                    </div>
+                    <textarea id="writing-input" class="essay-textarea" placeholder="Enter essay..."></textarea>
+                    <button id="btn-submit-writing" class="btn-primary" disabled>提出</button>
                 </div>
-
-                <div id="writing-feedback" class="card feedback-panel hidden">
-                    <!-- Feedback injected here -->
-                </div>
+                <div id="writing-feedback" class="card feedback-panel hidden"></div>
             </section>
 
             <!-- Reading View -->
             <section id="reading-view" class="view-section hidden">
-                <div class="action-bar">
-                    <button id="btn-gen-reading" class="btn-secondary">
-                        <i data-lucide="sparkles"></i>
-                        <span data-i18n="start_practice">読解問題を生成する</span>
-                    </button>
-                </div>
-                <div id="reading-content" class="reading-grid">
-                    <!-- Passage and Questions -->
-                </div>
+                <div class="action-bar"><button id="btn-gen-reading" class="btn-secondary">読解生成</button></div>
+                <div id="reading-content" class="reading-grid"></div>
             </section>
 
             <!-- Speaking View -->
             <section id="speaking-view" class="view-section hidden">
-                <div class="card mock-interview">
-                    <div class="interview-header">
-                        <i data-lucide="mic" class="mic-icon large"></i>
-                        <h3 data-i18n="speaking_module">Speaking 練習</h3>
+                <div class="card"><h3 data-i18n="speaking_module">Speaking 練習</h3><button id="btn-gen-speaking" class="btn-secondary">トピック生成</button></div>
+            </section>
+
+            <!-- Settings View -->
+            <section id="settings-view" class="view-section hidden">
+                <div class="card settings-card">
+                    <h3 data-i18n="settings">設定</h3>
+                    <div class="settings-group">
+                        <label>AI Model (Generation/Assistant)</label>
+                        <select id="model-gen" class="model-select"></select>
                     </div>
-                    <div id="speaking-prompt" class="prompt-box">
-                        <p data-i18n="speaking_coming_soon">近日公開予定のAI音声対話モード、または現在はテキストベースの練習が可能です。</p>
-                        <button id="btn-gen-speaking" class="btn-secondary">トピックを生成</button>
+                    <div class="settings-group">
+                        <label>AI Model (Evaluation/Speaking)</label>
+                        <select id="model-eval" class="model-select"></select>
                     </div>
                 </div>
             </section>
-
         </main>
     </div>
-
-    <!-- SDK & Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script type="module" src="js/app.js"></script>
 </body>
