@@ -18,7 +18,7 @@ class IELTSCoach {
         this.initSupabase();
         this.initScoreSelectors();
         this.initAPIFields();
-        this.applyFontSize(this.userSettings.FONT_SIZE); // Apply from storage
+        this.applyFontSize(this.userSettings.FONT_SIZE || 16);
         this.bindEvents();
         this.applyLanguage();
         this.updateView();
@@ -126,8 +126,6 @@ class IELTSCoach {
         });
         document.getElementById('btn-submit-writing')?.addEventListener('click', () => this.handleWritingSubmission());
         document.getElementById('btn-save-keys')?.addEventListener('click', () => this.handleSaveKeys());
-
-        // Zoom Controls
         document.getElementById('zoom-in')?.addEventListener('click', () => this.changeZoom(1));
         document.getElementById('zoom-out')?.addEventListener('click', () => this.changeZoom(-1));
         document.getElementById('zoom-reset')?.addEventListener('click', () => this.changeZoom(0));
@@ -135,9 +133,7 @@ class IELTSCoach {
 
     changeZoom(delta) {
         let size = this.userSettings.FONT_SIZE || 16;
-        if (delta === 0) size = 16;
-        else size = Math.max(12, Math.min(30, size + delta));
-        
+        size = delta === 0 ? 16 : Math.max(12, Math.min(30, size + delta));
         this.userSettings.FONT_SIZE = size;
         this.applyFontSize(size);
         this.saveSettings();
@@ -150,7 +146,7 @@ class IELTSCoach {
             supabase_key: document.getElementById('input-supabase-key').value.trim()
         };
         localStorage.setItem('iac_keys', JSON.stringify(keys));
-        alert("Credentials saved. Reloading...");
+        alert("Saved. Reloading...");
         window.location.reload();
     }
 
@@ -193,42 +189,22 @@ class IELTSCoach {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
             if (!res.ok) return;
             const data = await res.json();
-            
             this.availableModels = { text: [], audio: [] };
-            
             data.models.forEach(m => {
                 const name = m.name.replace('models/', '');
-                // Categorize models
-                // 1. Text category (all generateContent models)
-                if (m.supportedGenerationMethods.includes('generateContent')) {
-                    this.availableModels.text.push(name);
-                }
-                // 2. Audio category (Gemini 2.x which has native audio / Multimodal Live)
-                if (name.includes('gemini-2.0') || name.includes('flash') || name.includes('audio')) {
-                    this.availableModels.audio.push(name);
-                }
+                if (m.supportedGenerationMethods.includes('generateContent')) this.availableModels.text.push(name);
+                if (name.includes('gemini-2.0') || name.includes('flash') || name.includes('audio')) this.availableModels.audio.push(name);
             });
-            console.log("Categorized Models:", this.availableModels);
-        } catch {
-            this.availableModels = { text: ['gemini-1.5-flash-latest'], audio: ['gemini-2.0-flash-exp'] };
-        }
+        } catch { this.availableModels = { text: ['gemini-1.5-flash-latest'], audio: ['gemini-2.0-flash-exp'] }; }
     }
 
     initModelSelectors() {
         const genSelect = document.getElementById('model-gen');
         const audioSelect = document.getElementById('model-audio');
         if (!genSelect || !audioSelect) return;
-        
-        genSelect.innerHTML = ''; 
-        audioSelect.innerHTML = '';
-        
-        this.availableModels.text.forEach(m => {
-            genSelect.add(new Option(m, m, m === this.userSettings.MODEL_GEN, m === this.userSettings.MODEL_GEN));
-        });
-        this.availableModels.audio.forEach(m => {
-            audioSelect.add(new Option(m, m, m === this.userSettings.MODEL_AUDIO, m === this.userSettings.MODEL_AUDIO));
-        });
-        
+        genSelect.innerHTML = ''; audioSelect.innerHTML = '';
+        this.availableModels.text.forEach(m => genSelect.add(new Option(m, m, m === this.userSettings.MODEL_GEN, m === this.userSettings.MODEL_GEN)));
+        this.availableModels.audio.forEach(m => audioSelect.add(new Option(m, m, m === this.userSettings.MODEL_AUDIO, m === this.userSettings.MODEL_AUDIO)));
         genSelect.addEventListener('change', (e) => { this.userSettings.MODEL_GEN = e.target.value; this.saveSettings(); });
         audioSelect.addEventListener('change', (e) => { this.userSettings.MODEL_AUDIO = e.target.value; this.saveSettings(); });
     }
@@ -239,19 +215,23 @@ class IELTSCoach {
         try {
             btn.disabled = true; btn.innerHTML = "Generating...";
             const target = this.userSettings[skill === 'writing' ? 'W' : (skill === 'reading' ? 'R' : 'S')];
-            const prompt = `Generate an IELTS ${skill} Task. Level: Band ${target}. JSON format: {"title":"","prompt":""}`;
-            
-            // Generate topic using the text model for all skills
+            const prompt = `Generate an IELTS ${skill} Task. Level: Band ${target}. Return JSON: {"title":"","prompt":""}`;
             const res = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
-            
             this.currentTasks[skill] = res;
             if (skill === 'writing') {
                 document.getElementById('writing-task-container').classList.remove('hidden');
                 document.getElementById('writing-prompt-title').textContent = res.title;
                 document.getElementById('writing-prompt-body').textContent = res.prompt;
                 document.getElementById('btn-submit-writing').disabled = false;
+            } else if (skill === 'speaking') {
+                document.getElementById('speaking-task-container').classList.remove('hidden');
+                document.getElementById('speaking-prompt-title').textContent = res.title;
+                document.getElementById('speaking-prompt-body').textContent = res.prompt;
+            } else if (skill === 'reading') {
+                const container = document.getElementById('reading-content');
+                container.innerHTML = `<div class="card task-display"><h4 class="section-title">${res.title}</h4><p class="task-body">${res.prompt}</p></div>`;
             }
-        } catch (err) { alert("Generation failed. Check API Key/Model settings."); }
+        } catch (err) { alert("Generation failed. Check API Key/Settings."); }
         finally { btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); }
     }
 
@@ -277,9 +257,9 @@ class IELTSCoach {
         if (!essay) return;
         const panel = document.getElementById('writing-feedback');
         panel.classList.remove('hidden');
-        panel.innerHTML = "AI Evaluator is working...";
+        panel.innerHTML = "Analyzing...";
         try {
-            const prompt = `IELTS Examiner Mode. Evaluate essay for task: ${this.currentTasks.writing?.prompt}. Essay: "${essay}". Return JSON score and feedback.`;
+            const prompt = `IELTS Examiner. Evaluate essay for task: ${this.currentTasks.writing?.prompt}. Essay: "${essay}". Return JSON.`;
             const feedback = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
             this.renderFeedback(feedback);
         } catch (err) { panel.innerHTML = "Evaluation error."; }
@@ -290,13 +270,8 @@ class IELTSCoach {
         const score = feedback.overall_band || feedback.score || "N/A";
         const getString = (v) => (typeof v === 'string' ? v : (v?.text || v?.feedback || JSON.stringify(v)));
         const summary = this.currentLang === 'ja' ? getString(feedback.summary_ja) : getString(feedback.summary_en);
-        let html = `<div class="feedback-header"><h3>Band Score: ${score}</h3><p>${summary}</p></div>`;
-        html += `<div class="crit-grid">`;
-        if (feedback.criteria) {
-            Object.entries(feedback.criteria).forEach(([k, v]) => {
-                html += `<div class="crit-box"><strong>${k.toUpperCase()}: ${v.band || v.score || 'N/A'}</strong><p>${getString(v.feedback || v)}</p></div>`;
-            });
-        }
+        let html = `<div class="feedback-header"><h3>Band Score: ${score}</h3><p>${summary}</p></div><div class="crit-grid">`;
+        if (feedback.criteria) Object.entries(feedback.criteria).forEach(([k, v]) => { html += `<div class="crit-box"><strong>${k.toUpperCase()}: ${v.band || v.score || 'N/A'}</strong><p>${getString(v.feedback || v)}</p></div>`; });
         html += `</div>`;
         panel.innerHTML = html;
         panel.scrollIntoView({ behavior: 'smooth' });
@@ -306,7 +281,7 @@ class IELTSCoach {
         if (!this.supabase) return;
         const { data } = await this.supabase.from('practice_sessions').select('*').order('created_at', { ascending: false }).limit(3);
         const list = document.getElementById('recommendation-list');
-        if (list) list.innerHTML = data && data.length ? data.map(d => `<div>Past: ${d.score}</div>`).join('') : 'No history yet.';
+        if (list) list.innerHTML = data && data.length ? data.map(d => `<div>Past: ${d.score}</div>`).join('') : 'No history.';
     }
 }
 

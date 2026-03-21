@@ -70,7 +70,7 @@
                     <h3 data-i18n="target_overall_settings">目標スコア設定</h3>
                     <p data-i18n="overall_formula">各セクションの目標を入力してください。Overallが自動計算されます。</p>
                 </div>
-                <!-- Target score stats simplified for brevity -->
+                <!-- Target score stats -->
                 <div class="stats-grid">
                     <div class="stat-card primary">
                         <div class="stat-info">
@@ -105,7 +105,7 @@
             <section id="writing-view" class="view-section hidden">
                 <div class="action-bar"><button id="btn-gen-writing" class="btn-secondary"><i data-lucide="sparkles"></i>生成</button></div>
                 <div id="writing-task-container" class="card task-display hidden">
-                    <h4 id="writing-prompt-title"></h4><p id="writing-prompt-body"></p>
+                    <h4 id="writing-prompt-title"></h4><p id="writing-prompt-body" class="task-body"></p>
                 </div>
                 <div class="card workspace">
                     <textarea id="writing-input" class="essay-textarea" placeholder="Enter essay..."></textarea>
@@ -122,7 +122,11 @@
 
             <!-- Speaking View -->
             <section id="speaking-view" class="view-section hidden">
-                <div class="card"><h3 data-i18n="speaking_module">Speaking 練習</h3><button id="btn-gen-speaking" class="btn-secondary">トピック生成</button></div>
+                <div class="action-bar"><button id="btn-gen-speaking" class="btn-secondary">トピック生成</button></div>
+                <div id="speaking-task-container" class="card task-display hidden">
+                    <h4 id="speaking-prompt-title"></h4>
+                    <p id="speaking-prompt-body" class="task-body"></p>
+                </div>
             </section>
 
             <!-- Settings View -->
@@ -151,14 +155,6 @@
                     </div>
 
                     <hr class="divider">
-
-                    <div class="settings-section">
-                        <h4 class="section-title">表示設定</h4>
-                        <div class="settings-group">
-                            <label>文字の大きさ (Font Size): <span id="font-size-val">16</span>px</label>
-                            <input type="range" id="input-font-size" min="14" max="24" step="1" class="settings-slider">
-                        </div>
-                    </div>
 
                     <div class="settings-section">
                         <h4 class="section-title">AI モデル設定</h4>
