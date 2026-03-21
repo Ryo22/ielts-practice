@@ -200,29 +200,73 @@ class IELTSCoach {
     }
 
     async generateProblem(skill) {
-        const target = this.userSettings[skill === 'reading' ? 'R' : 'W'];
-        const prompt = `Act as IELTS Examiner. Generate ${skill} Task. Level: Band ${target}. CBT Format. JSON with title, passage, questions/prompt. Use structured JSON.`;
-        const res = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
-        if (skill === 'writing') {
-            document.getElementById('writing-prompt-title').textContent = res.title;
-            document.getElementById('writing-prompt-body').textContent = res.prompt || res.passage;
-            document.getElementById('btn-submit-writing').disabled = false;
-        } else if (skill === 'reading') {
-            document.getElementById('reading-passage-content').textContent = res.passage;
-            document.getElementById('reading-questions-content').textContent = res.questions;
-        }
+        const btn = document.getElementById(`btn-gen-${skill}`);
+        if (!btn) return;
+        const originalText = btn.innerHTML;
+        try {
+            btn.disabled = true; btn.innerHTML = "Generating...";
+            const target = this.userSettings[skill === 'reading' ? 'R' : (skill === 'writing' ? 'W' : 'S')];
+            
+            // Rich Topic Diversity Pool
+            const topics = [
+                "Marine Biology & Oceanography", "Urban Planning & Smart Cities", "Linguistics & Evolution of Language",
+                "Space Exploration & Colonization", "Archaeology & Ancient Civilizations", "Artificial Intelligence & Ethics",
+                "Sustainable Agriculture & Food Security", "Consumer Psychology & Marketing", "Renaissance Art & History",
+                "Renewable Energy Infrastructure", "Cognitive Neuroscience & Learning", "Microeconomics & Global Trade",
+                "Deep Sea Ecosystems", "Architecture & Sustainable Design", "Sports Physiology & Performance",
+                "The History of Printing & Media", "Environmental Law & Policy", "Sociology of Rural Communities",
+                "Robotics in Medicine", "Alternative Education Systems", "Zoology & Extinction Patterns",
+                "Future of Transportation", "Nanotechnology in Textiles", "Astrophysics & Dark Matter",
+                "Evolutionary Psychology", "Global Supply Chain Logistics", "Ancient Philosophy & Modern Life"
+            ];
+            const randomTopic = topics[Math.floor(Math.random() * topics.length)];
+
+            // Refined CBT Output Format Prompt with Random Topic
+            const prompt = `Act as an expert IELTS Examiner. 
+            CONTEXT: The world's most variable IELTS question generator.
+            TOPIC AREA: ${randomTopic}. 
+            TASK: Generate a highly authentic IELTS ${skill} Task. 
+            Constraint: Avoid common/generic topics. Be highly specific and academic.
+            Level: Band ${target}.
+            Structure with multiple paragraphs and clear headings.
+            FOR READING: Passage and Questions must be separate.
+            Return JSON Format: {"title":"(Original Title)","passage":"(Academic Passage with \\n)","questions":"(Specific Questions 1-10)","prompt":"(Combined Task Description)"}`;
+            
+            const res = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
+            this.currentTasks[skill] = res;
+            
+            if (skill === 'writing') {
+                document.getElementById('writing-prompt-title').textContent = res.title;
+                document.getElementById('writing-prompt-body').textContent = res.prompt || res.passage || res.questions;
+                document.getElementById('btn-submit-writing').disabled = false;
+            } else if (skill === 'speaking') {
+                document.getElementById('speaking-task-container').classList.remove('hidden');
+                document.getElementById('speaking-prompt-title').textContent = res.title;
+                document.getElementById('speaking-prompt-body').textContent = res.passage || res.prompt;
+            } else if (skill === 'reading') {
+                document.getElementById('reading-passage-content').textContent = res.passage;
+                document.getElementById('reading-questions-content').textContent = res.questions;
+            }
+        } catch (err) { alert("Generation failed. Check settings."); console.error(err); }
+        finally { btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); }
     }
 
     async callGemini(prompt, isJson = false, model = 'gemini-1.5-flash-latest') {
         const apiKey = this.getGeminiKey();
+        if (!apiKey) throw new Error("API Key missing");
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 contents: [{ parts: [{ text: prompt }] }],
-                generationConfig: { temperature: 0.7, responseMimeType: isJson ? "application/json" : "text/plain" }
+                generationConfig: { 
+                    temperature: 0.85, 
+                    topP: 0.95,
+                    responseMimeType: isJson ? "application/json" : "text/plain" 
+                }
             })
         });
+        if (!res.ok) throw new Error("API Call Failed");
         const data = await res.json();
         const text = data.candidates[0].content.parts[0].text;
         return isJson ? JSON.parse(text) : text;
