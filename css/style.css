@@ -387,33 +387,45 @@ textarea, input, select, button {
     transform: scale(1.02);
 }
 
-/* Task Display */
+/* Task Display (IELTS Exam Paper Style) */
 .task-display {
-    border-left: 4px solid var(--secondary);
-    margin-bottom: 1.5rem;
+    background-color: #ffffff; /* Classic Paper White */
+    color: #1a1a1a; /* Professional Dark Text */
+    border: 1px solid #d1d5db;
+    border-radius: 0.5rem;
+    padding: 2.5rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
     animation: slideIn 0.3s ease-out;
+    line-height: 1.7;
 }
 
-@keyframes slideIn {
-    from { opacity: 0; transform: translateX(-10px); }
-    to { opacity: 1; transform: translateX(0); }
-}
-
-.badge {
-    background-color: var(--primary);
-    color: white;
-    font-size: 0.65rem;
-    padding: 0.2rem 0.6rem;
-    border-radius: 1rem;
-    text-transform: uppercase;
+.task-display h4, .task-display .section-title {
+    color: #00769d; /* IELTS Blue */
+    font-size: 1.4rem;
     font-weight: 700;
+    margin-bottom: 1.5rem;
+    border-bottom: 2px solid #00769d;
+    padding-bottom: 0.5rem;
+    text-transform: uppercase;
 }
 
 .task-body {
-    margin-top: 1rem;
+    white-space: pre-wrap; /* RESPECT NEWLINES */
     font-size: 1.1rem;
-    color: var(--text-primary);
-    line-height: 1.8;
+    color: #2d3748;
+    margin-top: 1rem;
+    word-spacing: 0.05em;
+}
+
+.task-body p {
+    margin-bottom: 1.25rem;
+}
+
+/* Specific styling for Reading Passages */
+.reading-grid .task-display {
+    max-width: 900px;
+    margin: 0 auto;
 }
 
 /* Feedback Styling */

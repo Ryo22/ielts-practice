@@ -215,7 +215,14 @@ class IELTSCoach {
         try {
             btn.disabled = true; btn.innerHTML = "Generating...";
             const target = this.userSettings[skill === 'writing' ? 'W' : (skill === 'reading' ? 'R' : 'S')];
-            const prompt = `Generate an IELTS ${skill} Task. Level: Band ${target}. Return JSON: {"title":"","prompt":""}`;
+            const prompt = `Act as an expert IELTS Examiner. 
+            Generate an IELTS ${skill} Task. 
+            Level: Band ${target}. 
+            Task Difficulty: Highly authentic.
+            Structure: Use multiple paragraphs with clear logical transitions. Ensure the passage (for reading) or topic description (for speaking/writing) is structured with distinct line breaks for readability. 
+            Return JSON Format: {"title":"(Title)","prompt":"(Structured Content with multiple \\n for paragraphs)"}`;
+            
+            // Generate topic using the text model for all skills
             const res = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
             this.currentTasks[skill] = res;
             if (skill === 'writing') {
@@ -229,7 +236,12 @@ class IELTSCoach {
                 document.getElementById('speaking-prompt-body').textContent = res.prompt;
             } else if (skill === 'reading') {
                 const container = document.getElementById('reading-content');
-                container.innerHTML = `<div class="card task-display"><h4 class="section-title">${res.title}</h4><p class="task-body">${res.prompt}</p></div>`;
+                container.innerHTML = `
+                    <div class="task-display">
+                        <h4 class="section-title">${res.title}</h4>
+                        <div class="task-body">${res.prompt}</div>
+                    </div>
+                `;
             }
         } catch (err) { alert("Generation failed. Check API Key/Settings."); }
         finally { btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); }
