@@ -14,19 +14,54 @@ class IELTSCoach {
     }
 
     async init() {
+        this.applySavedKeys(); // Apply keys from storage
         this.initSupabase();
         this.initScoreSelectors();
+        this.initAPIFields(); // Set UI values
         this.bindEvents();
         this.applyLanguage();
         this.updateView();
         this.calculateOverall();
         
-        // Dynamic Model Loading
-        await this.fetchModels();
-        this.initModelSelectors();
+        if (this.getGeminiKey()) {
+            await this.fetchModels();
+            this.initModelSelectors();
+        }
         
         lucide.createIcons();
         await this.loadPracticeHistory();
+    }
+
+    applySavedKeys() {
+        // Load custom keys from storage and override CONFIG if present
+        const savedKeys = localStorage.getItem('iac_keys');
+        if (savedKeys) {
+            const keys = JSON.parse(savedKeys);
+            if (keys.gemini) this.userSettings.GEMINI_KEY = keys.gemini;
+            if (keys.supabase_url) this.userSettings.SUPABASE_URL = keys.supabase_url;
+            if (keys.supabase_key) this.userSettings.SUPABASE_KEY = keys.supabase_key;
+        }
+    }
+
+    getGeminiKey() {
+        return this.userSettings.GEMINI_KEY || CONFIG.GEMINI_API_KEY;
+    }
+
+    getSupabaseURL() {
+        return this.userSettings.SUPABASE_URL || CONFIG.SUPABASE_URL;
+    }
+
+    getSupabaseKey() {
+        return this.userSettings.SUPABASE_KEY || CONFIG.SUPABASE_ANON_KEY;
+    }
+
+    initAPIFields() {
+        const gemInput = document.getElementById('input-gemini-key');
+        const urlInput = document.getElementById('input-supabase-url');
+        const keyInput = document.getElementById('input-supabase-key');
+        if (gemInput) gemInput.value = this.getGeminiKey();
+        if (urlInput) urlInput.value = this.getSupabaseURL();
+        if (keyInput) keyInput.value = this.getSupabaseKey();
     }
 
     loadSettings() {
@@ -44,8 +79,10 @@ class IELTSCoach {
     }
 
     async fetchModels() {
+        const apiKey = this.getGeminiKey();
+        if (!apiKey) return;
         try {
-            const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${CONFIG.GEMINI_API_KEY}`;
+            const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`;
             const res = await fetch(url);
             if (!res.ok) throw new Error("Could not fetch models");
             const data = await res.json();
@@ -113,9 +150,9 @@ class IELTSCoach {
         if (progress) progress.style.width = `${(final / 9) * 100}%`;
     }
 
-    async initSupabase() {
-        if (typeof supabase !== 'undefined') {
-            this.supabase = supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+    initSupabase() {
+        if (typeof supabase !== 'undefined' && this.getSupabaseURL() && this.getSupabaseKey()) {
+            this.supabase = supabase.createClient(this.getSupabaseURL(), this.getSupabaseKey());
         }
     }
 
@@ -135,6 +172,20 @@ class IELTSCoach {
         });
 
         document.getElementById('btn-submit-writing')?.addEventListener('click', () => this.handleWritingSubmission());
+        
+        // Key Saving
+        document.getElementById('btn-save-keys')?.addEventListener('click', () => this.handleSaveKeys());
+    }
+
+    handleSaveKeys() {
+        const keys = {
+            gemini: document.getElementById('input-gemini-key').value.trim(),
+            supabase_url: document.getElementById('input-supabase-url').value.trim(),
+            supabase_key: document.getElementById('input-supabase-key').value.trim()
+        };
+        localStorage.setItem('iac_keys', JSON.stringify(keys));
+        alert("API credentials saved! The app will reload to apply changes.");
+        window.location.reload();
     }
 
     switchLanguage(lang) {
@@ -205,7 +256,9 @@ class IELTSCoach {
     }
 
     async callGemini(prompt, isJson = false, model = 'gemini-1.5-flash-latest') {
-        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${CONFIG.GEMINI_API_KEY}`;
+        const apiKey = this.getGeminiKey();
+        if (!apiKey) throw new Error("GEMINI_API_KEY is not set. Please update in Settings.");
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
         const response = await fetch(url, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

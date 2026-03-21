@@ -123,14 +123,42 @@
             <section id="settings-view" class="view-section hidden">
                 <div class="card settings-card">
                     <h3 data-i18n="settings">設定</h3>
-                    <div class="settings-group">
-                        <label>AI Model (Generation/Assistant)</label>
-                        <select id="model-gen" class="model-select"></select>
+                    
+                    <!-- API Credentials -->
+                    <div class="settings-section">
+                        <h4 class="section-title">API 連携設定</h4>
+                        <div class="settings-group">
+                            <label>Gemini API Key</label>
+                            <input type="password" id="input-gemini-key" class="settings-input" placeholder="AIzaSy...">
+                        </div>
+                        <div class="settings-group">
+                            <label>Supabase URL</label>
+                            <input type="text" id="input-supabase-url" class="settings-input" placeholder="https://your-project.supabase.co">
+                        </div>
+                        <div class="settings-group">
+                            <label>Supabase Anon Key</label>
+                            <input type="password" id="input-supabase-key" class="settings-input" placeholder="eyJhbGciOiJIUzI1Ni...">
+                        </div>
+                        <button id="btn-save-keys" class="btn-primary mini">
+                            <i data-lucide="save"></i> 接続情報を保存
+                        </button>
                     </div>
-                    <div class="settings-group">
-                        <label>AI Model (Evaluation/Speaking)</label>
-                        <select id="model-eval" class="model-select"></select>
+
+                    <hr class="divider">
+
+                    <div class="settings-section">
+                        <h4 class="section-title">AI モデル設定</h4>
+                        <div class="settings-group">
+                            <label>AI Model (Generation/Assistant)</label>
+                            <select id="model-gen" class="model-select"></select>
+                        </div>
+                        <div class="settings-group">
+                            <label>AI Model (Evaluation/Speaking)</label>
+                            <select id="model-eval" class="model-select"></select>
+                        </div>
                     </div>
+
+                    <p class="settings-hint">※設定したキーはブラウザのローカルストレージにのみ保存されます。秘密情報の取り扱いにご注意ください。</p>
                 </div>
             </section>
         </main>
