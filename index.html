@@ -3,18 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IELTS Adaptive Coach (IAC)</title>
+    <title>IELTS Adaptive Coach (IAC) - Test Mode</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="dark-mode">
+<body class="cbt-mode">
     <div id="app" class="app-container">
-        <!-- Sidebar Navigation -->
+        <!-- Sidebar Navigation (Application Shell) -->
         <aside class="sidebar">
             <div class="logo-section">
                 <i data-lucide="graduation-cap" class="logo-icon"></i>
@@ -52,15 +52,21 @@
 
         <!-- Main Content Area -->
         <main class="main-content">
-            <header class="top-header">
-                <div class="header-left">
-                    <h2 id="view-title" data-i18n="dashboard">ダッシュボード</h2>
+            <!-- Official CBT Header -->
+            <header class="cbt-header">
+                <div class="cbt-header-left">
+                    <div class="cbt-logo">IELTS</div>
+                    <div class="cbt-test-info">Test taker ID: <span class="test-user">IAC_USER_2025</span></div>
                 </div>
-                <!-- Global Font Size Controls -->
-                <div class="header-right zoom-controls">
-                    <button id="zoom-out" class="btn-zoom" title="文字を小さく"><i data-lucide="minus"></i></button>
-                    <button id="zoom-reset" class="btn-zoom" title="リセット">A</button>
-                    <button id="zoom-in" class="btn-zoom" title="文字を大きく"><i data-lucide="plus"></i></button>
+                <div class="cbt-header-right">
+                    <div class="zoom-controls">
+                        <button id="zoom-out" class="btn-zoom"><i data-lucide="minus"></i></button>
+                        <button id="zoom-reset" class="btn-zoom">A</button>
+                        <button id="zoom-in" class="btn-zoom"><i data-lucide="plus"></i></button>
+                    </div>
+                    <button class="cbt-icon-btn"><i data-lucide="wifi"></i></button>
+                    <button class="cbt-icon-btn"><i data-lucide="bell"></i></button>
+                    <button class="cbt-icon-btn"><i data-lucide="menu"></i></button>
                 </div>
             </header>
 
@@ -68,109 +74,84 @@
             <section id="dashboard-view" class="view-section">
                 <div class="card intro-card">
                     <h3 data-i18n="target_overall_settings">目標スコア設定</h3>
-                    <p data-i18n="overall_formula">各セクションの目標を入力してください。Overallが自動計算されます。</p>
+                    <p data-i18n="overall_formula">各セクションの目標を入力してください。</p>
                 </div>
-                <!-- Target score stats -->
+                <!-- Simplified for brevity -->
                 <div class="stats-grid">
                     <div class="stat-card primary">
-                        <div class="stat-info">
-                            <span class="stat-label" data-i18n="target_overall">目標 Overall</span>
-                            <span id="target-overall-val" class="stat-value">7.5</span>
-                        </div>
-                        <div class="stat-progress">
-                            <div class="progress-bar"><div id="overall-progress" class="progress-fill" style="width: 80%;"></div></div>
-                        </div>
+                        <span class="stat-label" data-i18n="target_overall">目標 Overall</span>
+                        <span id="target-overall-val" class="stat-value">7.5</span>
                     </div>
-                    <div class="stat-card input-card">
-                        <span class="stat-label">L</span>
-                        <select id="target-l" class="score-select"></select>
-                    </div>
-                    <div class="stat-card input-card">
-                        <span class="stat-label">R</span>
-                        <select id="target-r" class="score-select"></select>
-                    </div>
-                    <div class="stat-card input-card">
-                        <span class="stat-label">W</span>
-                        <select id="target-w" class="score-select"></select>
-                    </div>
-                    <div class="stat-card input-card">
-                        <span class="stat-label">S</span>
-                        <select id="target-s" class="score-select"></select>
-                    </div>
+                    <div class="stat-card input-card">L <select id="target-l" class="score-select"></select></div>
+                    <div class="stat-card input-card">R <select id="target-r" class="score-select"></select></div>
+                    <div class="stat-card input-card">W <select id="target-w" class="score-select"></select></div>
+                    <div class="stat-card input-card">S <select id="target-s" class="score-select"></select></div>
                 </div>
-                <div class="card"><h3 data-i18n="recommendation">推奨学習</h3><div id="recommendation-list"></div></div>
             </section>
 
             <!-- Writing View -->
             <section id="writing-view" class="view-section hidden">
-                <div class="action-bar"><button id="btn-gen-writing" class="btn-secondary"><i data-lucide="sparkles"></i>生成</button></div>
-                <div id="writing-task-container" class="card task-display hidden">
-                    <h4 id="writing-prompt-title"></h4><p id="writing-prompt-body" class="task-body"></p>
-                </div>
-                <div class="card workspace">
-                    <textarea id="writing-input" class="essay-textarea" placeholder="Enter essay..."></textarea>
-                    <button id="btn-submit-writing" class="btn-primary" disabled>提出</button>
+                <div class="cbt-instruction">Part 2: Read the text and answer questions.</div>
+                <div class="action-bar"><button id="btn-gen-writing" class="btn-secondary">課題生成</button></div>
+                <div id="writing-task-container" class="cbt-workspace-split">
+                    <div id="writing-prompt-area" class="cbt-prompt-card">
+                        <h4 id="writing-prompt-title"></h4>
+                        <div id="writing-prompt-body" class="task-body"></div>
+                    </div>
+                    <div class="cbt-writing-area">
+                        <textarea id="writing-input" class="cbt-textarea" placeholder="Type your essay here..."></textarea>
+                        <button id="btn-submit-writing" class="btn-primary" disabled>Finish Section</button>
+                    </div>
                 </div>
                 <div id="writing-feedback" class="card feedback-panel hidden"></div>
             </section>
 
-            <!-- Reading View -->
+            <!-- Reading View (CBT Split Screen) -->
             <section id="reading-view" class="view-section hidden">
+                <div class="cbt-instruction">Part 1: Read the passage and answer questions 1-10.</div>
                 <div class="action-bar"><button id="btn-gen-reading" class="btn-secondary">読解生成</button></div>
-                <div id="reading-content" class="reading-grid"></div>
+                <div id="reading-cbt-container" class="cbt-split-viewer">
+                    <div class="cbt-passage-area">
+                        <div id="reading-passage-content" class="task-body">練習を開始するには「読解生成」をクリックしてください。</div>
+                    </div>
+                    <div class="cbt-question-area">
+                        <div id="reading-questions-content" class="task-body">設問がここに表示されます。</div>
+                    </div>
+                </div>
+                <!-- CBT Navigator Bar -->
+                <footer class="cbt-navigator">
+                    <div class="cbt-nav-left">Part 1 <div class="cbt-nav-dots"><span class="active">1</span><span>2</span><span>3</span><span>4</span><span>5</span></div></div>
+                    <div class="cbt-nav-right"><button class="cbt-btn-check"><i data-lucide="check"></i> Review</button></div>
+                </footer>
             </section>
 
             <!-- Speaking View -->
             <section id="speaking-view" class="view-section hidden">
-                <div class="action-bar"><button id="btn-gen-speaking" class="btn-secondary">トピック生成</button></div>
-                <div id="speaking-task-container" class="card task-display hidden">
+                 <div class="cbt-instruction">Speaking Topic Discussion</div>
+                 <div class="action-bar"><button id="btn-gen-speaking" class="btn-secondary">トピック生成</button></div>
+                 <div id="speaking-task-container" class="cbt-prompt-card hidden">
                     <h4 id="speaking-prompt-title"></h4>
                     <p id="speaking-prompt-body" class="task-body"></p>
-                </div>
+                 </div>
             </section>
 
             <!-- Settings View -->
             <section id="settings-view" class="view-section hidden">
                 <div class="card settings-card">
                     <h3 data-i18n="settings">設定</h3>
-                    
-                    <!-- API Credentials -->
                     <div class="settings-section">
                         <h4 class="section-title">API 連携設定</h4>
-                        <div class="settings-group">
-                            <label>Gemini API Key</label>
-                            <input type="password" id="input-gemini-key" class="settings-input" placeholder="AIzaSy...">
-                        </div>
-                        <div class="settings-group">
-                            <label>Supabase URL</label>
-                            <input type="text" id="input-supabase-url" class="settings-input" placeholder="https://your-project.supabase.co">
-                        </div>
-                        <div class="settings-group">
-                            <label>Supabase Anon Key</label>
-                            <input type="password" id="input-supabase-key" class="settings-input" placeholder="eyJhbGciOiJIUzI1Ni...">
-                        </div>
-                        <button id="btn-save-keys" class="btn-primary mini">
-                            <i data-lucide="save"></i> 接続情報を保存
-                        </button>
+                        <div class="settings-group"><label>Gemini API</label><input type="password" id="input-gemini-key" class="settings-input"></div>
+                        <div class="settings-group"><label>Supabase URL</label><input type="text" id="input-supabase-url" class="settings-input"></div>
+                        <div class="settings-group"><label>Supabase Key</label><input type="password" id="input-supabase-key" class="settings-input"></div>
+                        <button id="btn-save-keys" class="btn-primary mini">保存</button>
                     </div>
-
                     <hr class="divider">
-
                     <div class="settings-section">
                         <h4 class="section-title">AI モデル設定</h4>
-                        <div class="settings-group">
-                            <label>Text Generation Model (Writing / Reading)</label>
-                            <select id="model-gen" class="model-select"></select>
-                            <p class="settings-sub">文章生成やエッセイの添削に使用します。</p>
-                        </div>
-                        <div class="settings-group">
-                            <label>Audio / Speaking Model (Speaking Practice)</label>
-                            <select id="model-audio" class="model-select"></select>
-                            <p class="settings-sub">Gemini 2.0 Flash Native Audio などの高度な音声対話に使用します。</p>
-                        </div>
+                        <div class="settings-group"><label>Text Model</label><select id="model-gen" class="model-select"></select></div>
+                        <div class="settings-group"><label>Audio Model</label><select id="model-audio" class="model-select"></select></div>
                     </div>
-
-                    <p class="settings-hint">※設定したキーはブラウザのローカルストレージにのみ保存されます。秘密情報の取り扱いにご注意ください。</p>
                 </div>
             </section>
         </main>

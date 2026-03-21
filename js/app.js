@@ -187,7 +187,6 @@ class IELTSCoach {
         if (!apiKey) return;
         try {
             const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}`);
-            if (!res.ok) return;
             const data = await res.json();
             this.availableModels = { text: [], audio: [] };
             data.models.forEach(m => {
@@ -215,41 +214,34 @@ class IELTSCoach {
         try {
             btn.disabled = true; btn.innerHTML = "Generating...";
             const target = this.userSettings[skill === 'writing' ? 'W' : (skill === 'reading' ? 'R' : 'S')];
-            const prompt = `Act as an expert IELTS Examiner. 
-            Generate an IELTS ${skill} Task. 
-            Level: Band ${target}. 
-            Task Difficulty: Highly authentic.
-            Structure: Use multiple paragraphs with clear logical transitions. Ensure the passage (for reading) or topic description (for speaking/writing) is structured with distinct line breaks for readability. 
-            Return JSON Format: {"title":"(Title)","prompt":"(Structured Content with multiple \\n for paragraphs)"}`;
             
-            // Generate topic using the text model for all skills
+            // Refined CBT Output Format Prompt
+            const prompt = `Act as an expert IELTS Examiner. Generate a highly authentic IELTS ${skill} Task. Level: Band ${target}.
+            Structure with multiple paragraphs and clear headings.
+            FOR READING: Passage and Questions must be separate.
+            Return JSON Format: {"title":"(Title)","passage":"(The full passage with \\n)","questions":"(The questions 1-10 with \\n)","prompt":"(Combined for Writing)"}`;
+            
             const res = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
             this.currentTasks[skill] = res;
+            
             if (skill === 'writing') {
-                document.getElementById('writing-task-container').classList.remove('hidden');
                 document.getElementById('writing-prompt-title').textContent = res.title;
-                document.getElementById('writing-prompt-body').textContent = res.prompt;
+                document.getElementById('writing-prompt-body').textContent = res.prompt || res.passage || res.questions;
                 document.getElementById('btn-submit-writing').disabled = false;
             } else if (skill === 'speaking') {
                 document.getElementById('speaking-task-container').classList.remove('hidden');
                 document.getElementById('speaking-prompt-title').textContent = res.title;
-                document.getElementById('speaking-prompt-body').textContent = res.prompt;
+                document.getElementById('speaking-prompt-body').textContent = res.passage || res.prompt;
             } else if (skill === 'reading') {
-                const container = document.getElementById('reading-content');
-                container.innerHTML = `
-                    <div class="task-display">
-                        <h4 class="section-title">${res.title}</h4>
-                        <div class="task-body">${res.prompt}</div>
-                    </div>
-                `;
+                document.getElementById('reading-passage-content').textContent = res.passage;
+                document.getElementById('reading-questions-content').textContent = res.questions;
             }
-        } catch (err) { alert("Generation failed. Check API Key/Settings."); }
+        } catch (err) { alert("Generation failed. Check settings."); }
         finally { btn.disabled = false; btn.innerHTML = originalText; lucide.createIcons(); }
     }
 
     async callGemini(prompt, isJson = false, model = 'gemini-1.5-flash-latest') {
         const apiKey = this.getGeminiKey();
-        if (!apiKey) throw new Error("Key missing");
         const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -258,7 +250,6 @@ class IELTSCoach {
                 generationConfig: { temperature: 0.7, responseMimeType: isJson ? "application/json" : "text/plain" }
             })
         });
-        if (!res.ok) throw new Error("API fail");
         const data = await res.json();
         const text = data.candidates[0].content.parts[0].text;
         return isJson ? JSON.parse(text) : text;
@@ -271,7 +262,7 @@ class IELTSCoach {
         panel.classList.remove('hidden');
         panel.innerHTML = "Analyzing...";
         try {
-            const prompt = `IELTS Examiner. Evaluate essay for task: ${this.currentTasks.writing?.prompt}. Essay: "${essay}". Return JSON.`;
+            const prompt = `Evaluate ielts essay for Band ${this.userSettings.W}. Return JSON. Essay: "${essay}"`;
             const feedback = await this.callGemini(prompt, true, this.userSettings.MODEL_GEN);
             this.renderFeedback(feedback);
         } catch (err) { panel.innerHTML = "Evaluation error."; }
@@ -280,7 +271,7 @@ class IELTSCoach {
     renderFeedback(feedback) {
         const panel = document.getElementById('writing-feedback');
         const score = feedback.overall_band || feedback.score || "N/A";
-        const getString = (v) => (typeof v === 'string' ? v : (v?.text || v?.feedback || JSON.stringify(v)));
+        const getString = (v) => (typeof v === 'string' ? v : (v?.text || v?.summary || JSON.stringify(v)));
         const summary = this.currentLang === 'ja' ? getString(feedback.summary_ja) : getString(feedback.summary_en);
         let html = `<div class="feedback-header"><h3>Band Score: ${score}</h3><p>${summary}</p></div><div class="crit-grid">`;
         if (feedback.criteria) Object.entries(feedback.criteria).forEach(([k, v]) => { html += `<div class="crit-box"><strong>${k.toUpperCase()}: ${v.band || v.score || 'N/A'}</strong><p>${getString(v.feedback || v)}</p></div>`; });
@@ -289,12 +280,7 @@ class IELTSCoach {
         panel.scrollIntoView({ behavior: 'smooth' });
     }
 
-    async loadPracticeHistory() {
-        if (!this.supabase) return;
-        const { data } = await this.supabase.from('practice_sessions').select('*').order('created_at', { ascending: false }).limit(3);
-        const list = document.getElementById('recommendation-list');
-        if (list) list.innerHTML = data && data.length ? data.map(d => `<div>Past: ${d.score}</div>`).join('') : 'No history.';
-    }
+    async loadPracticeHistory() { if (!this.supabase) return; }
 }
 
 window.addEventListener('DOMContentLoaded', () => { window.app = new IELTSCoach(); });
