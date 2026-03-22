@@ -1,257 +1,247 @@
-/* IELTS CBT CSS Framework */
+/* IELTS CBT - Premium UI Framework */
 :root {
     --ielts-red: #E01E3C;
     --ielts-blue: #00769D;
-    --ielts-bg: #F4F4F4;
-    --ielts-instruction: #EFEFEF;
-    --ielts-border: #D1D5DB;
-    --text-primary: #1A1A1A;
+    --ielts-bg-light: #F4F4F4;
+    --ielts-instruction-bg: #EFEFEF;
+    --ielts-border: #CED4DA;
+    --ielts-white: #FFFFFF;
+    --text-primary: #1F2937;
     --text-secondary: #4B5563;
-    --bg-dark: #0F172A;
     --sidebar-width: 260px;
-    --cbt-header-height: 60px;
-    --cbt-nav-height: 50px;
-    --font-main: 'Inter', system-ui, sans-serif;
+    --header-height: 60px;
+    --sub-header-height: 48px;
+    --footer-height: 52px;
+    --font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
     --base-font-size: 16px;
-    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
-    font-family: var(--font-main);
-    background-color: var(--ielts-bg);
+    font-family: var(--font-family);
+    background-color: var(--ielts-bg-light);
     color: var(--text-primary);
     font-size: var(--base-font-size);
-    overflow: hidden; /* App shell handles scroll */
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
 }
 
-/* App Shell */
-.app-container { display: flex; height: 100vh; width: 100vw; }
+/* Base App Container */
+.app-container {
+    display: flex;
+    width: 100%;
+    height: 100%;
+}
 
-/* Sidebar */
+/* Sidebar Styling (Remains Dark for App Feel) */
 .sidebar {
     width: var(--sidebar-width);
-    background-color: #020617;
+    background-color: #0F172A;
     color: #94A3B8;
     display: flex;
     flex-direction: column;
-    padding: 1.5rem;
-    z-index: 1000;
+    padding: 1.25rem;
+    flex-shrink: 0;
+    transition: all 0.3s ease;
 }
-.logo-section { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 2.5rem; color: #fff; }
-.logo-icon { width: 32px; height: 32px; color: var(--ielts-blue); }
-.nav-links { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+
+.logo-section {
+    display: flex;
+    align-items: center;gap: 0.75rem;
+    margin-bottom: 2rem;
+    padding: 0.5rem;
+}
+
+.logo-text { color: #fff; font-size: 1.25rem; font-weight: 800; letter-spacing: -0.025em; }
+
+.nav-links { flex: 1; display: flex; flex-direction: column; gap: 0.25rem; }
 .nav-item {
     display: flex; align-items: center; gap: 0.75rem; padding: 0.75rem 1rem;
-    border-radius: 0.75rem; text-decoration: none; color: inherit; font-weight: 500;
+    border-radius: 0.5rem; text-decoration: none; color: inherit; font-weight: 500;
+    transition: all 0.2s;
 }
-.nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.05); color: #fff; }
-.nav-item.active { background: var(--ielts-blue); box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
+.nav-item:hover { color: #fff; background: rgba(255,255,255,0.05); }
+.nav-item.active { background: var(--ielts-blue); color: #fff; }
 
-/* Main Content */
+/* Main Content Area */
 .main-content {
     flex: 1;
     display: flex;
     flex-direction: column;
+    background: #fff;
     overflow: hidden;
-    position: relative;
 }
 
-/* CBT Official Header */
+/* CBT Header (Red Logo Style) */
 .cbt-header {
-    height: var(--cbt-header-height);
+    height: var(--header-height);
     background: #fff;
-    border-bottom: 2px solid var(--ielts-border);
+    border-bottom: 1px solid var(--ielts-border);
     display: flex; justify-content: space-between; align-items: center;
     padding: 0 1.5rem; flex-shrink: 0;
+}
+
+.cbt-logo {
+    color: var(--ielts-red);
+    font-size: 1.75rem;
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: -2px;
+}
+
+.cbt-test-info {
+    font-size: 0.875rem;
+    color: #666;
+    margin-left: 1.5rem;
+    padding-left: 1.5rem;
+    border-left: 1px solid #ddd;
 }
 
 .cbt-timer {
-    font-family: 'JetBrains Mono', monospace;
-    background: #111;
-    color: #ff0000;
-    padding: 0.25rem 1rem;
-    border-radius: 4px;
-    font-size: 1.2rem;
+    font-family: 'Courier New', Courier, monospace;
     font-weight: 700;
-    border: 1px solid #333;
+    font-size: 1.5rem;
+    color: #d00;
+    background: #000;
+    padding: 2px 10px;
+    border-radius: 4px;
 }
-.cbt-logo { color: var(--ielts-red); font-weight: 800; font-size: 1.5rem; letter-spacing: -1px; }
-.cbt-test-info { margin-left: 2rem; border-left: 1px solid #ddd; padding-left: 1rem; color: #666; font-size: 0.9rem; }
-.cbt-header-right { display: flex; align-items: center; gap: 1rem; }
-.cbt-icon-btn { background: none; border: none; color: #555; cursor: pointer; padding: 0.5rem; }
 
-/* CBT Instruction Bar */
+.cbt-header-right { display: flex; align-items: center; gap: 1.25rem; }
+
+/* Sub Header / Instruction Bar */
 .cbt-instruction {
-    background: var(--ielts-instruction);
-    padding: 1rem 1.5rem;
-    font-size: 0.9rem;
+    height: var(--sub-header-height);
+    background: var(--ielts-instruction-bg);
+    border-bottom: 1px solid var(--ielts-border);
+    display: flex; align-items: center;
+    padding: 0 1.5rem;
+    font-size: 0.95rem;
     font-weight: 600;
-    color: #444;
-    border-bottom: 1px solid #ddd;
+    color: #333;
+    flex-shrink: 0;
 }
 
-/* CBT Split Layout */
-.cbt-split-viewer {
+/* Core Exam Workspace Layout */
+.view-section {
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.view-section.hidden { display: none !important; }
+
+/* 2-Column Split Support */
+.cbt-workspace-split, .cbt-split-viewer {
     display: grid;
     grid-template-columns: 1fr 1fr;
+    flex: 1;
     overflow: hidden;
-    gap: 0;
-    position: relative;
 }
-.cbt-passage-area, .cbt-question-area {
-    background: #fff;
+
+/* Question / Prompt Pane (Scrollable) */
+.cbt-prompt-card, .cbt-passage-area {
     padding: 2.5rem;
     overflow-y: auto;
-    height: calc(100vh - 110px - 50px); /* Adjust for header/nav */
-    border-right: 1px solid #eee;
+    background: #fff;
+    border-right: 2px solid var(--ielts-border);
+    line-height: 1.7;
 }
-.cbt-question-area { background: #fafafa; border-right: none; }
 
-/* CBT Navigation Bar (Bottom) */
-.cbt-navigator {
-    height: var(--cbt-nav-height);
+/* Answer / Workspace Pane (Scrollable) */
+.cbt-writing-area, .cbt-question-area {
+    display: flex;
+    flex-direction: column;
+    background: var(--ielts-bg-light);
+    overflow: hidden;
+}
+
+.cbt-textarea-container {
+    flex: 1;
+    padding: 2rem;
+    display: flex;
+    flex-direction: column;
+}
+
+.cbt-textarea {
+    flex: 1;
+    width: 100%;
+    border: 1px solid var(--ielts-border);
+    padding: 1.5rem;
+    font-size: 1.15rem;
+    font-family: var(--font-family);
+    line-height: 1.6;
+    resize: none;
+    outline: none;
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.cbt-textarea:focus { border-color: var(--ielts-blue); }
+
+/* CBT Bottom Toolbar */
+.cbt-toolbar-bottom {
+    height: 60px;
+    padding: 0 2rem;
+    display: flex; justify-content: space-between; align-items: center;
     background: #fff;
     border-top: 1px solid var(--ielts-border);
+}
+
+.word-count { font-weight: bold; color: #555; }
+
+/* CBT Navigation / Footer */
+.cbt-navigator {
+    height: var(--footer-height);
+    background: var(--ielts-instruction-bg);
+    border-top: 1px solid var(--ielts-border);
     display: flex; justify-content: space-between; align-items: center;
-    padding: 0 1.5rem; flex-shrink: 0;
-}
-.cbt-nav-dots { display: inline-flex; gap: 0.5rem; margin-left: 1rem; }
-.cbt-nav-dots span {
-    width: 24px; height: 24px; border: 1px solid #ccc; display: grid; place-items: center;
-    font-size: 0.75rem; cursor: pointer; border-radius: 2px;
-}
-.cbt-nav-dots span.active { background: var(--ielts-blue); color: #fff; border-color: var(--ielts-blue); }
-
-/* CBT Workspace (Writing) */
-.cbt-workspace-split {
-    display: grid; grid-template-columns: 1fr 1fr; flex: 1; overflow: hidden;
-}
-.cbt-prompt-card { background: #fff; padding: 2.5rem; border-right: 1px solid #eee; overflow-y: auto; }
-/* CBT Writing Toolbar */
-.cbt-toolbar-bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #ddd;
+    padding: 0 1.5rem;
+    flex-shrink: 0;
 }
 
-.word-count {
-    font-size: 0.9rem;
-    color: var(--text-secondary);
-    font-weight: 600;
+.cbt-nav-btn-group { display: flex; gap: 4px; }
+.nav-box {
+    width: 28px; height: 28px; background: #fff; border: 1px solid #adb5bd;
+    display: grid; place-items: center; font-size: 0.8rem; font-weight: 600; cursor: pointer;
 }
+.nav-box.active { background: var(--ielts-blue); color: #fff; border-color: var(--ielts-blue); }
 
-/* Speaking Voice UI */
+/* Official UI Elements */
+.btn-primary { background: var(--ielts-blue); color: #fff; border: none; padding: 0.6rem 1.25rem; font-weight: 600; cursor: pointer; border-radius: 4px; }
+.btn-secondary { background: #fff; border: 1px solid var(--ielts-blue); color: var(--ielts-blue); padding: 0.5rem 1rem; border-radius: 4px; cursor: pointer; margin: 1rem 1.5rem; }
+
+/* Dashboard UI (Non-Exam) */
+#dashboard-view { padding: 3rem; overflow-y: auto; }
+.card { background: #fff; border: 1px solid var(--ielts-border); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
+
+/* Voice Interaction UI (Speaking) */
 .cbt-voice-container {
-    max-width: 800px;
-    margin: 3rem auto;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    align-items: center;
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    background: var(--ielts-bg-light); padding: 3rem;
 }
-
 .cbt-examiner-bubble {
-    width: 100%;
-    padding: 2.5rem;
-    background: #fff;
-    border: 1px solid var(--ielts-border);
-    border-radius: 1rem;
-    position: relative;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-}
-
-.examiner-meta {
-    font-size: 0.8rem;
-    text-transform: uppercase;
-    font-weight: 700;
-    color: var(--ielts-blue);
-    margin-bottom: 1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.status-indicator {
-    font-size: 0.75rem;
-    color: var(--ielts-red);
-    font-weight: 600;
-    margin-top: 1rem;
-    animation: blink 1s infinite;
-}
-
-.cbt-user-mic-area {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1.5rem;
+    max-width: 600px; background: #fff; padding: 2.5rem; border-radius: 4px;
+    border: 1px solid var(--ielts-border); position: relative; margin-bottom: 3rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
 }
 
 .mic-btn {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    background: var(--ielts-blue);
-    color: #fff;
-    border: none;
-    cursor: pointer;
-    display: grid;
-    place-items: center;
-    box-shadow: 0 6px 15px rgba(0,118,157,0.3);
-    transition: var(--transition);
+    width: 100px; height: 100px; border-radius: 50%; background: var(--ielts-blue);
+    border: none; color: #fff; cursor: pointer; display: grid; place-items: center;
+    transition: all 0.3s; box-shadow: 0 8px 25px rgba(0, 118, 157, 0.4);
 }
+.mic-btn:hover { transform: translateY(-3px); }
+.recording .mic-btn { background: var(--ielts-red); animation: pulse 1.5s infinite; }
 
-.mic-btn:disabled {
-    background: #ccc;
-    box-shadow: none;
-}
-
-.mic-btn:active {
-    transform: scale(0.9);
-}
-
-.transcript-preview {
-    font-style: italic;
-    color: #444;
-    min-height: 1.5rem;
-    text-align: center;
-}
-
-@keyframes blink { 50% { opacity: 0; } }
 @keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(0, 118, 157, 0.4); }
-    70% { box-shadow: 0 0 0 20px rgba(0, 118, 157, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(0, 118, 157, 0); }
+    0% { box-shadow: 0 0 0 0 rgba(224, 30, 60, 0.4); }
+    70% { box-shadow: 0 0 0 20px rgba(224, 30, 60, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(224, 30, 60, 0); }
 }
 
-.recording .mic-btn {
-    animation: pulse 1.5s infinite;
-    background: var(--ielts-red);
-}
-
-/* Typography for Task Content */
-.task-body {
-    white-space: pre-wrap; font-size: 1.1rem; line-height: 1.75;
-}
-.task-body h3, .task-body h4 { color: #111; margin: 1.5rem 0 1rem 0; }
-
-/* Dashboard & Cards (Classic App Look) */
-.view-section { padding: 2rem 3rem; flex: 1; overflow-y: auto; }
-.view-section.hidden { display: none !important; }
-.card { background: #fff; border-radius: 0.5rem; border: 1px solid var(--ielts-border); padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 1rem; }
-.stat-card.primary { background: linear-gradient(135deg, #00769D, #005f7d); color: #fff; }
-
-/* Utils */
-.btn-primary { background: var(--ielts-blue); color: #fff; border: none; padding: 0.75rem 1.5rem; border-radius: 4px; font-weight: 600; cursor: pointer; }
-.btn-secondary { background: #fff; border: 1px solid var(--ielts-blue); color: var(--ielts-blue); padding: 0.5rem 1rem; border-radius: 4px; font-weight: 600; cursor: pointer; margin-bottom: 1.5rem; }
-
-/* Header Zoom Controls (Redefined) */
-.zoom-controls { display: flex; gap: 0.25rem; }
-.btn-zoom { background: #eee; border: 1px solid #ddd; width: 28px; height: 28px; border-radius: 2px; cursor: pointer; font-size: 0.7rem; }
-.btn-zoom:hover { background: #ddd; }
+/* Animations */
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.view-section { animation: fadeIn 0.4s ease-in-out; }

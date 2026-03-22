@@ -3,41 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IELTS Adaptive Coach (IAC) - Final Test Mode</title>
+    <title>IELTS Practive Tool - Official CBT Mode</title>
     <!-- Google Fonts: Inter -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="css/style.css">
 </head>
-<body class="cbt-mode">
+<body>
     <div id="app" class="app-container">
         <!-- Sidebar Navigation -->
         <aside class="sidebar">
-            <div class="logo-section"><i data-lucide="graduation-cap" class="logo-icon"></i><h1 class="logo-text">IAC</h1></div>
-            <nav class="nav-links">
-                <a href="#" class="nav-item active" data-view="dashboard"><i data-lucide="layout-dashboard"></i><span data-i18n="dashboard">ダッシュボード</span></a>
-                <a href="#" class="nav-item" data-view="writing"><i data-lucide="pen-tool"></i><span data-i18n="writing_module">Writing</span></a>
-                <a href="#" class="nav-item" data-view="reading"><i data-lucide="book-open"></i><span data-i18n="reading_module">Reading</span></a>
-                <a href="#" class="nav-item" data-view="speaking"><i data-lucide="mic"></i><span data-i18n="speaking_module">Speaking</span></a>
-                <a href="#" class="nav-item" data-view="settings"><i data-lucide="settings"></i><span data-i18n="settings">設定</span></a>
-            </nav>
-            <div class="sidebar-footer">
-                <div class="lang-switch"><button id="lang-ja" class="btn-lang active">JA</button><button id="lang-en" class="btn-lang">EN</button></div>
+            <div class="logo-section">
+                <i data-lucide="graduation-cap" class="logo-icon"></i>
+                <h1 class="logo-text">IAC</h1>
             </div>
+            <nav class="nav-links">
+                <a href="#" class="nav-item active" data-view="dashboard"><i data-lucide="layout-dashboard"></i><span>ダッシュボード</span></a>
+                <a href="#" class="nav-item" data-view="writing"><i data-lucide="pen-tool"></i><span>Writing</span></a>
+                <a href="#" class="nav-item" data-view="reading"><i data-lucide="book-open"></i><span>Reading</span></a>
+                <a href="#" class="nav-item" data-view="speaking"><i data-lucide="mic"></i><span>Speaking</span></a>
+                <a href="#" class="nav-item" data-view="settings"><i data-lucide="settings"></i><span>設定</span></a>
+            </nav>
         </aside>
 
         <!-- Main Content Area -->
         <main class="main-content">
-            <!-- CBT Official Header -->
+            <!-- Official CBT Header -->
             <header class="cbt-header">
-                <div class="cbt-header-left">
+                <div class="header-left d-flex align-items-center">
                     <div class="cbt-logo">IELTS</div>
-                    <div class="cbt-test-info">Test taker ID: <span class="test-user">IAC_USER_2025</span></div>
+                    <div class="cbt-test-info">Test taker ID: <span id="user-id">IAC_2025_PREMIUM</span></div>
                 </div>
-                <!-- Official Timer -->
                 <div id="cbt-timer" class="cbt-timer">60:00</div>
                 <div class="cbt-header-right">
                     <div class="zoom-controls">
@@ -50,94 +49,110 @@
 
             <!-- Dashboard View -->
             <section id="dashboard-view" class="view-section">
-                <div class="card intro-card">
-                    <h3 data-i18n="target_overall_settings">目標スコア設定</h3>
-                    <p data-i18n="overall_formula">各セクションの目標帯域を選択してください。</p>
-                </div>
-                <div class="stats-grid">
-                    <div class="stat-card primary"><span class="stat-label">Overall</span><span id="target-overall-val" class="stat-value">7.5</span></div>
-                    <div class="stat-card">L <select id="target-l" class="score-select"></select></div>
-                    <div class="stat-card">R <select id="target-r" class="score-select"></select></div>
-                    <div class="stat-card">W <select id="target-w" class="score-select"></select></div>
-                    <div class="stat-card">S <select id="target-s" class="score-select"></select></div>
+                <div class="card">
+                    <h3>目標スコア設定</h3>
+                    <p>各セクションの目標帯域を選択し、学習を開始してください。</p>
+                    <div class="stats-grid" style="margin-top:2rem;">
+                         <div class="stat-card" style="background:var(--ielts-blue); color:#fff; padding:1rem; border-radius:4px;">
+                             <span>Target Overall</span><br><h2 id="target-overall-val">7.5</h2>
+                         </div>
+                    </div>
+                    <!-- Skill Selectors -->
+                    <div class="stats-grid" style="margin-top:1.5rem;">
+                         <div>L <select id="target-l" class="score-select"></select></div>
+                         <div>R <select id="target-r" class="score-select"></select></div>
+                         <div>W <select id="target-w" class="score-select"></select></div>
+                         <div>S <select id="target-s" class="score-select"></select></div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Writing View -->
+            <!-- Writing View (split mode) -->
             <section id="writing-view" class="view-section hidden">
-                <div class="cbt-instruction">Part 2: You should spend about 40 minutes on this task.</div>
-                <div class="action-bar"><button id="btn-gen-writing" class="btn-secondary">課題生成</button></div>
+                <div class="cbt-instruction">Part 2: Spend about 40 minutes on this topic. Write at least 250 words.</div>
                 <div class="cbt-workspace-split">
+                    <!-- Prompt Area -->
                     <div class="cbt-prompt-card">
-                        <h4 id="writing-prompt-title"></h4>
-                        <div id="writing-prompt-body" class="task-body"></div>
+                         <button id="btn-gen-writing" class="btn-secondary" style="margin-left:0; margin-top:0;">課題を生成する</button>
+                         <h2 id="writing-prompt-title" style="margin-bottom:1rem; font-size:1.5rem; color:var(--ielts-blue);"></h2>
+                         <div id="writing-prompt-body" class="task-body"></div>
+                         <div id="writing-feedback" class="feedback-panel hidden" style="margin-top:2rem; padding:1.5rem; border:1px solid #ddd; background:#f9f9f9;"></div>
                     </div>
+                    <!-- Writing Area -->
                     <div class="cbt-writing-area">
-                        <textarea id="writing-input" class="cbt-textarea" placeholder="Type your response here..."></textarea>
-                        <div class="cbt-toolbar-bottom">
-                            <div class="word-count">Word count: <span id="word-count-val">0</span></div>
-                            <button id="btn-submit-writing" class="btn-primary" disabled>Finalize Response</button>
-                        </div>
+                         <div class="cbt-textarea-container">
+                              <textarea id="writing-input" class="cbt-textarea" placeholder="ここに回答を入力してください..."></textarea>
+                         </div>
+                         <div class="cbt-toolbar-bottom">
+                              <div class="word-count">Word count: <span id="word-count-val">0</span></div>
+                              <button id="btn-submit-writing" class="btn-primary" disabled>Finish Section</button>
+                         </div>
                     </div>
                 </div>
-                <div id="writing-feedback" class="card feedback-panel hidden"></div>
             </section>
 
-            <!-- Reading View -->
+            <!-- Reading View (split mode) -->
             <section id="reading-view" class="view-section hidden">
-                <div class="cbt-instruction">Part 1: Questions 1-10. Complete the notes. ONE WORD ONLY.</div>
-                <div class="action-bar"><button id="btn-gen-reading" class="btn-secondary">読解試験 開始</button></div>
+                <div class="cbt-instruction">Part 1: Read the text and answer questions 1–10.</div>
                 <div class="cbt-split-viewer">
-                    <div class="cbt-passage-area"><div id="reading-passage-content" class="task-body">Reading passage will appear here.</div></div>
-                    <div class="cbt-question-area"><div id="reading-questions-content" class="task-body">Questions will appear here.</div></div>
+                    <div class="cbt-passage-area">
+                         <button id="btn-gen-reading" class="btn-secondary" style="margin-left:0; margin-top:0;">読解試験を開始</button>
+                         <div id="reading-passage-content" class="task-body"></div>
+                    </div>
+                    <div class="cbt-question-area" style="padding:2.5rem;">
+                         <div id="reading-questions-content" class="task-body"></div>
+                    </div>
                 </div>
             </section>
 
-            <!-- Speaking View (AI VOICE MODE) -->
+            <!-- Speaking View -->
             <section id="speaking-view" class="view-section hidden">
-                 <div class="cbt-instruction">Speaking Test: Face-to-face simulation with AI Examiner</div>
-                 <div class="action-bar"><button id="btn-start-speaking" class="btn-primary">試験開始 (Audio Mode)</button></div>
-                 
-                 <div class="cbt-voice-container">
-                    <!-- AI Examiner -->
-                    <div class="cbt-examiner-bubble card">
-                        <div class="examiner-meta"><i data-lucide="user"></i> Examiner</div>
-                        <p id="examiner-text">試験を開始するには上のボタンを押してください。あなたの声が認識され、対話が始まります。</p>
-                        <div id="examiner-status" class="status-indicator hidden">AI is speaking...</div>
+                <div class="cbt-instruction">Speaking Test Simulation: Direct Interaction</div>
+                <div class="cbt-voice-container">
+                    <div class="cbt-examiner-bubble">
+                        <div style="color:var(--ielts-red); font-weight:800; font-size:0.8rem; margin-bottom:0.5rem;">EXAMINER</div>
+                        <p id="examiner-text">IELTS スピーキング試験シミュレーターへようこそ。「試験を開始」を押すと、Part 1の質問が始まります。</p>
+                        <div id="examiner-status" class="status-indicator hidden">Examiner is speaking...</div>
                     </div>
-
-                    <!-- User Mic -->
                     <div class="cbt-user-mic-area">
-                        <button id="btn-mic" class="mic-btn" disabled>
-                            <i data-lucide="mic"></i>
-                        </button>
-                        <p id="user-transcript" class="transcript-preview"></p>
-                        <div id="mic-status" class="status-indicator hidden">Recording...</div>
+                        <p id="user-transcript" style="font-style:italic; color:#888; margin-bottom:1rem;"></p>
+                        <button id="btn-mic" class="mic-btn" disabled><i data-lucide="mic" style="width:32px; height:32px;"></i></button>
+                        <div id="mic-status" class="status-indicator hidden" style="margin-top:1rem;">Recording...</div>
                     </div>
-                 </div>
-
-                 <div id="speaking-feedback" class="card feedback-panel hidden"></div>
+                    <button id="btn-start-speaking" class="btn-primary" style="margin-top:2rem;">試験を開始 (Audio Mode)</button>
+                    <div id="speaking-feedback" class="card hidden" style="width:100%; margin-top:3rem;"></div>
+                </div>
             </section>
 
             <!-- Settings View -->
             <section id="settings-view" class="view-section hidden">
-                <div class="card settings-card">
-                    <h3 data-i18n="settings">設定</h3>
+                <div class="card settings-card" style="max-width:800px; margin: 3rem auto;">
+                    <h3>設定</h3>
                     <div class="settings-section">
-                        <h4 class="section-title">API 連携設定</h4>
-                        <div class="settings-group"><label>Gemini API</label><input type="password" id="input-gemini-key" class="settings-input"></div>
-                        <div class="settings-group"><label>Supabase URL</label><input type="text" id="input-supabase-url" class="settings-input"></div>
-                        <div class="settings-group"><label>Supabase Key</label><input type="password" id="input-supabase-key" class="settings-input"></div>
-                        <button id="btn-save-keys" class="btn-primary mini">保存</button>
-                    </div>
-                    <hr class="divider">
-                    <div class="settings-section">
-                        <h4 class="section-title">AI モデル設定</h4>
-                        <div class="settings-group"><label>Text Model</label><select id="model-gen" class="model-select"></select></div>
-                        <div class="settings-group"><label>Audio Model</label><select id="model-audio" class="model-select"></select></div>
+                        <h4>API 連携設定 (ローカル保存)</h4>
+                        <div style="margin-top:1rem;">
+                             <label>Gemini API Key</label>
+                             <input type="password" id="input-gemini-key" class="settings-input" style="width:100%; padding:0.5rem; margin-bottom:1rem;">
+                             <button id="btn-save-keys" class="btn-primary">保存して再読み込み</button>
+                        </div>
                     </div>
                 </div>
             </section>
+
+            <!-- Bottom Navigation (Common) -->
+            <footer class="cbt-navigator">
+                 <div class="cbt-nav-left" style="font-weight:700;">Part 2</div>
+                 <div class="cbt-nav-btn-group">
+                      <div class="nav-box active">1</div>
+                      <div class="nav-box">2</div>
+                      <div class="nav-box">3</div>
+                      <div class="nav-box">4</div>
+                      <div class="nav-box">5</div>
+                 </div>
+                 <div class="cbt-nav-right">
+                      <button class="btn-primary" style="background:#5c5c5c; padding:0.4rem 1rem;">Review</button>
+                 </div>
+            </footer>
         </main>
     </div>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
