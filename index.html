@@ -107,19 +107,45 @@
 
             <!-- Speaking View -->
             <section id="speaking-view" class="view-section hidden">
-                <div class="cbt-instruction">Speaking Test Simulation: Direct Interaction</div>
+                <div class="cbt-instruction">Speaking Test Section: Part 1 - 3 Simulation</div>
                 <div class="cbt-voice-container">
+                    
+                    <!-- Phase Indicator -->
+                    <div id="speaking-phase-indicator" class="speaking-phase">PART 1: INTERVIEW</div>
+
+                    <!-- AI Examiner Bubble -->
                     <div class="cbt-examiner-bubble">
                         <div style="color:var(--ielts-red); font-weight:800; font-size:0.8rem; margin-bottom:0.5rem;">EXAMINER</div>
-                        <p id="examiner-text">IELTS スピーキング試験シミュレーターへようこそ。「試験を開始」を押すと、Part 1の質問が始まります。</p>
+                        <p id="examiner-text">IELTS スピーキング試験シミュレーターへようこそ。準備ができたら下のボタンを押して試験を開始してください。</p>
                         <div id="examiner-status" class="status-indicator hidden">Examiner is speaking...</div>
                     </div>
-                    <div class="cbt-user-mic-area">
-                        <p id="user-transcript" style="font-style:italic; color:#888; margin-bottom:1rem;"></p>
-                        <button id="btn-mic" class="mic-btn" disabled><i data-lucide="mic" style="width:32px; height:32px;"></i></button>
-                        <div id="mic-status" class="status-indicator hidden" style="margin-top:1rem;">Recording...</div>
+
+                    <!-- Part 2 Cue Card (Initially Hidden) -->
+                    <div id="cbt-cue-card" class="card cue-card hidden" style="background:#fffbe6; border:2px solid #ffe58f; padding:2rem; width:100%; max-width:600px; margin-bottom:2rem;">
+                         <h4 style="margin-bottom:1rem; border-bottom:1px solid #ddd; padding-bottom:0.5rem;">CUE CARD</h4>
+                         <div id="cue-card-content" class="task-body"></div>
+                         <div id="prep-timer-area" class="hidden" style="margin-top:1.5rem; text-align:center;">
+                              <div style="font-size:0.8rem; font-weight:700;">PREPARATION TIME</div>
+                              <div id="prep-timer" style="font-size:2rem; color:var(--ielts-red); font-weight:900;">60</div>
+                         </div>
                     </div>
-                    <button id="btn-start-speaking" class="btn-primary" style="margin-top:2rem;">試験を開始 (Audio Mode)</button>
+
+                    <!-- User Interaction Area -->
+                    <div class="cbt-user-mic-area">
+                        <div id="mic-label" style="font-size:0.9rem; font-weight:700; margin-bottom:1rem; color:var(--text-secondary);">WAITING TO START</div>
+                        <button id="btn-mic" class="mic-btn" disabled>
+                             <i data-lucide="mic" id="mic-icon-main" style="width:32px; height:32px;"></i>
+                        </button>
+                        <div id="mic-status" class="status-indicator hidden" style="margin-top:1rem;">LISTENING...</div>
+                    </div>
+
+                    <p id="user-transcript" style="font-style:italic; color:#888; margin-top:1.5rem; max-width:600px; text-align:center; min-height:1.5rem;"></p>
+
+                    <div class="voice-controls" style="margin-top:2.5rem;">
+                         <button id="btn-start-speaking" class="btn-primary">試験を開始 (Start Test)</button>
+                         <button id="btn-next-phase" class="btn-secondary hidden" style="margin:0;">次へ進む (Next Phase)</button>
+                    </div>
+
                     <div id="speaking-feedback" class="card hidden" style="width:100%; margin-top:3rem;"></div>
                 </div>
             </section>

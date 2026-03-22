@@ -217,30 +217,59 @@ body {
 #dashboard-view { padding: 3rem; overflow-y: auto; }
 .card { background: #fff; border: 1px solid var(--ielts-border); border-radius: 8px; padding: 2rem; margin-bottom: 2rem; }
 
-/* Voice Interaction UI (Speaking) */
-.cbt-voice-container {
-    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
-    background: var(--ielts-bg-light); padding: 3rem;
+/* Speaking Phase Indicator */
+.speaking-phase {
+    background: var(--ielts-red);
+    color: #fff;
+    padding: 0.5rem 1.5rem;
+    font-size: 0.8rem;
+    font-weight: 800;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+    margin-bottom: 2rem;
 }
+
+.cue-card {
+    background: #FFFBEE;
+    border: 2px solid #FFE58F;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    animation: slideUp 0.5s ease-out;
+}
+
+@keyframes slideUp {
+    from { transform: translateY(20px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+}
+
+.cbt-voice-container {
+    flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start;
+    background: var(--ielts-bg-light); padding: 3rem; overflow-y: auto;
+}
+
 .cbt-examiner-bubble {
-    max-width: 600px; background: #fff; padding: 2.5rem; border-radius: 4px;
-    border: 1px solid var(--ielts-border); position: relative; margin-bottom: 3rem;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    width: 100%; max-width: 600px; background: #fff; padding: 2rem 2.5rem; border-radius: 4px;
+    border: 1px solid var(--ielts-border); position: relative; margin-bottom: 2rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
 }
 
 .mic-btn {
-    width: 100px; height: 100px; border-radius: 50%; background: var(--ielts-blue);
+    width: 80px; height: 80px; border-radius: 50%; background: var(--ielts-blue);
     border: none; color: #fff; cursor: pointer; display: grid; place-items: center;
-    transition: all 0.3s; box-shadow: 0 8px 25px rgba(0, 118, 157, 0.4);
+    transition: all 0.3s; box-shadow: 0 6px 20px rgba(0, 118, 157, 0.3);
 }
-.mic-btn:hover { transform: translateY(-3px); }
-.recording .mic-btn { background: var(--ielts-red); animation: pulse 1.5s infinite; }
 
-@keyframes pulse {
-    0% { box-shadow: 0 0 0 0 rgba(224, 30, 60, 0.4); }
-    70% { box-shadow: 0 0 0 20px rgba(224, 30, 60, 0); }
-    100% { box-shadow: 0 0 0 0 rgba(224, 30, 60, 0); }
+.recording.mic-btn {
+    background: var(--ielts-red);
+    animation: micPulse 1.5s infinite;
 }
+
+@keyframes micPulse {
+    0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(224, 30, 60, 0.5); }
+    70% { transform: scale(1.05); box-shadow: 0 0 0 20px rgba(224, 30, 60, 0); }
+    100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(224, 30, 60, 0); }
+}
+
+.voice-controls { display: flex; gap: 1rem; }
 
 /* Animations */
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
